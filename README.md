@@ -31,17 +31,7 @@ Open the tracker in your browser and use the **How to use** button in the top ri
 
 ## Hosting
 
-This tracker is hosted via GitHub Pages and available at:
-
-```
-https://azzbo77.github.io/weekly-tracker
-```
-
-Or via the custom domain:
-
-```
-https://tracker.azzbo77.com
-```
+This tracker is hosted via GitHub Pages.
 
 ## Running locally
 
