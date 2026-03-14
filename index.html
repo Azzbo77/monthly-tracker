@@ -107,11 +107,24 @@
   .move-opt:hover { background: var(--surface2); color: var(--text); }
   .move-opt .move-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 7px; vertical-align: middle; }
 
-  .item-note-view { font-size: 12px; color: var(--text-2); margin-top: 5px; padding-top: 5px; border-top: 0.5px solid var(--border); line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
-  .item-note-edit { width: 100%; margin-top: 5px; font-size: 12px; border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm); padding: 5px 8px; background: var(--surface); color: var(--text); resize: vertical; min-height: 50px; font-family: 'DM Sans', sans-serif; outline: none; }
-  .item-note-edit:focus { border-color: var(--blue); }
-  .note-save { font-size: 11px; margin-top: 4px; padding: 3px 8px; background: none; border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm); cursor: pointer; color: var(--text-2); font-family: 'DM Sans', sans-serif; }
-  .note-save:hover { background: var(--surface2); }
+  /* Note editor */
+  .note-editor { margin-top: 6px; border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm); overflow: hidden; }
+  .note-toolbar { display: flex; gap: 2px; padding: 4px 6px; background: var(--surface); border-bottom: 0.5px solid var(--border); }
+  .note-tb-btn { background: none; border: none; cursor: pointer; color: var(--text-2); font-size: 12px; padding: 3px 7px; border-radius: 4px; font-family: 'DM Sans', sans-serif; line-height: 1.2; transition: background 0.1s, color 0.1s; }
+  .note-tb-btn:hover { background: var(--surface2); color: var(--text); }
+  .note-tb-btn.active { background: var(--surface2); color: var(--text); }
+  .note-tb-sep { width: 0.5px; background: var(--border-mid); margin: 2px 4px; }
+  .note-area { width: 100%; font-size: 12px; border: none; padding: 7px 9px; background: var(--surface); color: var(--text); resize: vertical; min-height: 60px; font-family: 'DM Sans', sans-serif; outline: none; display: block; }
+  .note-footer { display: flex; align-items: center; justify-content: space-between; padding: 4px 6px; background: var(--surface); border-top: 0.5px solid var(--border); }
+  .note-hint { font-size: 10px; color: var(--text-3); }
+  .note-save { font-size: 11px; padding: 3px 10px; background: var(--text); color: var(--bg); border: none; border-radius: var(--radius-sm); cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .note-save:hover { opacity: 0.85; }
+
+  /* Rendered note */
+  .item-note-view { font-size: 12px; color: var(--text-2); margin-top: 5px; padding-top: 5px; border-top: 0.5px solid var(--border); line-height: 1.6; word-break: break-word; }
+  .item-note-view ul { list-style: disc; padding-left: 16px; margin: 2px 0; }
+  .item-note-view li { margin: 1px 0; }
+  .item-note-view s { color: var(--text-3); }
 
   .add-row { display: flex; gap: 5px; margin-top: 8px; }
   .add-in { flex: 1; font-size: 13px; border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm); padding: 5px 9px; background: var(--surface); color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; }
@@ -127,14 +140,13 @@
   .section-body { margin-top: 10px; }
 
   .hint-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
-  .hint { font-size: 11px; color: var(--text-3); display: flex; align-items: center; gap: 4px; }
+  .hint { font-size: 11px; color: var(--text-3); }
 
   .summary-box { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); }
   .summary-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   .summary-label { font-size: 12px; font-weight: 500; color: var(--text-2); letter-spacing: 0.04em; text-transform: uppercase; }
   .summary-text { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text); white-space: pre-wrap; line-height: 1.75; }
 
-  /* ── Modals ── */
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: flex-start; justify-content: center; padding: 2rem 1rem; overflow-y: auto; }
   .modal-bg.open { display: flex; }
   .modal { background: var(--surface); border: 0.5px solid var(--border-mid); border-radius: var(--radius); padding: 24px; width: 560px; max-width: 95vw; margin: auto; }
@@ -143,7 +155,6 @@
   .modal textarea { width: 100%; height: 140px; font-size: 12px; font-family: 'DM Mono', monospace; border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm); padding: 8px; background: var(--surface2); color: var(--text); resize: vertical; outline: none; }
   .modal-actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
 
-  /* How to use modal styles */
   .help-section { margin-bottom: 20px; }
   .help-section:last-of-type { margin-bottom: 0; }
   .help-heading { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 0.5px solid var(--border); }
@@ -152,8 +163,7 @@
   .help-desc { font-size: 13px; color: var(--text-2); line-height: 1.5; }
   .help-para { font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 6px; }
   .help-para:last-child { margin-bottom: 0; }
-  .help-tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
-  .help-tag { font-size: 11px; border-radius: 4px; padding: 2px 7px; }
+  .help-tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; align-items: center; }
 
   .copy-ok { font-size: 12px; color: var(--green); margin-left: 8px; opacity: 0; transition: opacity 0.3s; }
   .copy-ok.show { opacity: 1; }
@@ -280,7 +290,7 @@
         <span class="help-icon">&#9671;</span>
         <span class="help-desc">Mark a task as ongoing. Ongoing tasks automatically carry over to the next week without any manual action. The diamond turns solid (&#9670;) when active. Use this for long-running work that spans several weeks or months.</span>
         <span class="help-icon">+&#9650;</span>
-        <span class="help-desc">Add or edit a note on a task. Use this to give context — such as what is causing a blocker, where a task is up to, or any relevant detail for your manager.</span>
+        <span class="help-desc">Add or edit a note on a task. Notes support bullet points and strikethrough formatting — see the Notes section below.</span>
         <span class="help-icon">&#8617;</span>
         <span class="help-desc">Restore a completed or cancelled task back to its original column if you marked it by mistake.</span>
         <span class="help-icon">&#x2715;</span>
@@ -289,22 +299,34 @@
     </div>
 
     <div class="help-section">
+      <div class="help-heading">Notes and formatting</div>
+      <p class="help-para">Click +▲ on any task to open the note editor. A small toolbar lets you format your note:</p>
+      <div class="help-grid">
+        <span class="help-icon">• List</span>
+        <span class="help-desc">Inserts a bullet point at the current cursor position. Each line starting with • is rendered as a list item when saved.</span>
+        <span class="help-icon">~~S~~</span>
+        <span class="help-desc">Wraps the selected text in ~~ markers to apply strikethrough formatting, useful for noting something that no longer applies.</span>
+      </div>
+      <p class="help-para" style="margin-top:8px;">Press <strong>Cmd+Enter</strong> (Mac) or <strong>Ctrl+Enter</strong> (Windows) to save a note quickly, or click the Save button.</p>
+    </div>
+
+    <div class="help-section">
       <div class="help-heading">Tags</div>
       <p class="help-para">Tags appear automatically on tasks to show their history at a glance.</p>
       <div class="help-tag-row">
-        <span class="help-tag tag-carried">carried</span>
-        <span class="help-desc" style="font-size:12px;color:var(--text-2);padding-top:2px;">This task was carried over from a previous week.</span>
+        <span class="tag tag-carried">carried</span>
+        <span class="help-desc" style="font-size:12px;color:var(--text-2);">This task was carried over from a previous week.</span>
       </div>
       <div class="help-tag-row" style="margin-top:6px;">
-        <span class="help-tag tag-ongoing">ongoing</span>
-        <span class="help-desc" style="font-size:12px;color:var(--text-2);padding-top:2px;">This task will automatically carry over each week until marked complete or cancelled.</span>
+        <span class="tag tag-ongoing">ongoing</span>
+        <span class="help-desc" style="font-size:12px;color:var(--text-2);">This task will automatically carry over each week until marked complete or cancelled.</span>
       </div>
     </div>
 
     <div class="help-section">
       <div class="help-heading">Navigating weeks</div>
       <p class="help-para">Use the arrows at the top to move between weeks. Each week's tasks are stored separately, so you can look back at previous weeks at any time.</p>
-      <p class="help-para">If you have incomplete tasks from a previous week, a blue banner will appear at the top offering to carry them all over to the current week in one click.</p>
+      <p class="help-para">If you have incomplete tasks from a previous week, a blue banner will appear offering to carry them all over to the current week in one click.</p>
     </div>
 
     <div class="help-section">
@@ -351,12 +373,90 @@ document.addEventListener('click', () => {
   document.querySelectorAll('.move-menu.open').forEach(m => m.classList.remove('open'));
 });
 
+// ── Note formatting ───────────────────────────────────────
+// Storage format: plain text with • for bullets and ~~text~~ for strikethrough
+// Rendered as HTML for display, plain text in the copied update
+
+function renderNoteHtml(raw) {
+  if (!raw) return '';
+  const lines = raw.split('\n');
+  let html = '';
+  let inList = false;
+  lines.forEach(line => {
+    // Apply strikethrough: ~~text~~ → <s>text</s>
+    const formatted = line.replace(/~~(.*?)~~/g, '<s>$1</s>');
+    if (line.startsWith('• ') || line === '•') {
+      if (!inList) { html += '<ul>'; inList = true; }
+      html += `<li>${formatted.replace(/^•\s*/, '')}</li>`;
+    } else {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += formatted ? `<span>${formatted}</span><br>` : '<br>';
+    }
+  });
+  if (inList) html += '</ul>';
+  // Remove trailing <br>
+  html = html.replace(/(<br>)+$/, '');
+  return html;
+}
+
+function noteToPlainText(raw) {
+  if (!raw) return '';
+  // Strip ~~ markers, keep bullet text
+  return raw.replace(/~~(.*?)~~/g, '$1');
+}
+
+function insertBullet(taId) {
+  const ta = document.getElementById(taId); if (!ta) return;
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const val = ta.value;
+  // Insert bullet at start of current line
+  const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+  const lineContent = val.substring(lineStart, end);
+  const hasBullet = lineContent.startsWith('• ');
+  if (hasBullet) {
+    // Remove bullet
+    ta.value = val.substring(0, lineStart) + lineContent.substring(2) + val.substring(end);
+    ta.selectionStart = ta.selectionEnd = start - 2;
+  } else {
+    // Add bullet — if line is empty just insert bullet+space, else insert at line start
+    ta.value = val.substring(0, lineStart) + '• ' + val.substring(lineStart);
+    ta.selectionStart = ta.selectionEnd = start + 2;
+  }
+  ta.focus();
+}
+
+function insertStrike(taId) {
+  const ta = document.getElementById(taId); if (!ta) return;
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const val = ta.value;
+  const selected = val.substring(start, end);
+  if (selected) {
+    // Check if already wrapped
+    if (selected.startsWith('~~') && selected.endsWith('~~')) {
+      const unwrapped = selected.slice(2, -2);
+      ta.value = val.substring(0, start) + unwrapped + val.substring(end);
+      ta.selectionStart = start; ta.selectionEnd = start + unwrapped.length;
+    } else {
+      const wrapped = `~~${selected}~~`;
+      ta.value = val.substring(0, start) + wrapped + val.substring(end);
+      ta.selectionStart = start; ta.selectionEnd = start + wrapped.length;
+    }
+  } else {
+    // No selection — insert placeholder
+    const placeholder = '~~text~~';
+    ta.value = val.substring(0, start) + placeholder + val.substring(end);
+    ta.selectionStart = start + 2; ta.selectionEnd = start + 6;
+  }
+  ta.focus();
+}
+
+// ── Persistence ───────────────────────────────────────────
 function save() {
-  try { localStorage.setItem('wt5_data', JSON.stringify({ weeks, weekOffset })); } catch(e) {}
+  try { localStorage.setItem('wt6_data', JSON.stringify({ weeks, weekOffset })); } catch(e) {}
 }
 function load() {
   try {
-    const raw = localStorage.getItem('wt5_data');
+    const raw = localStorage.getItem('wt6_data');
     if (!raw) return;
     const d = JSON.parse(raw);
     if (d.weeks) Object.assign(weeks, d.weeks);
@@ -367,14 +467,14 @@ function load() {
 function toggleTheme() {
   const dark = document.documentElement.getAttribute('data-theme') === 'dark';
   document.documentElement.setAttribute('data-theme', dark ? '' : 'dark');
-  try { localStorage.setItem('wt5_theme', dark ? 'light' : 'dark'); } catch(e) {}
+  try { localStorage.setItem('wt6_theme', dark ? 'light' : 'dark'); } catch(e) {}
 }
 (function(){
-  try { if (localStorage.getItem('wt5_theme') === 'dark') document.documentElement.setAttribute('data-theme','dark'); } catch(e) {}
+  try { if (localStorage.getItem('wt6_theme') === 'dark') document.documentElement.setAttribute('data-theme','dark'); } catch(e) {}
 })();
 
 function openHelp() { document.getElementById('help-modal').classList.add('open'); }
-function closeHelp(e) { if(e.target === document.getElementById('help-modal')) document.getElementById('help-modal').classList.remove('open'); }
+function closeHelp(e) { if(e.target===document.getElementById('help-modal')) document.getElementById('help-modal').classList.remove('open'); }
 function closeHelpBtn() { document.getElementById('help-modal').classList.remove('open'); }
 
 function exportData() {
@@ -497,7 +597,12 @@ function toggleOngoing(col, i) {
 }
 function toggleNote(col, i) {
   const k=col+i; editing[k]=!editing[k]; render();
-  if (editing[k]) { const ta=document.getElementById('nte-'+k); if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);} }
+  if (editing[k]) {
+    setTimeout(() => {
+      const ta=document.getElementById('nte-'+k);
+      if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}
+    }, 0);
+  }
 }
 function saveNote(col, i) {
   const k=col+i, ta=document.getElementById('nte-'+k);
@@ -519,9 +624,24 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 
 function renderItem(col, it, i) {
   const k=col+i, isEd=editing[k];
-  const noteHtml = isEd
-    ? `<textarea class="item-note-edit" id="nte-${k}" onkeydown="if(event.key==='Enter'&&(event.metaKey||event.ctrlKey))saveNote('${col}',${i})">${esc(it.note)}</textarea><button class="note-save" onclick="saveNote('${col}',${i})">Save note</button>`
-    : it.note ? `<div class="item-note-view">${esc(it.note)}</div>` : '';
+  let noteHtml = '';
+  if (isEd) {
+    const taId = 'nte-'+k;
+    noteHtml = `<div class="note-editor">
+      <div class="note-toolbar">
+        <button class="note-tb-btn" title="Insert bullet point" onclick="insertBullet('${taId}')">• List</button>
+        <div class="note-tb-sep"></div>
+        <button class="note-tb-btn" title="Strikethrough selected text" onclick="insertStrike('${taId}')" style="text-decoration:line-through;">S</button>
+      </div>
+      <textarea class="note-area" id="${taId}" onkeydown="if(event.key==='Enter'&&(event.metaKey||event.ctrlKey))saveNote('${col}',${i})">${esc(it.note)}</textarea>
+      <div class="note-footer">
+        <span class="note-hint">Cmd/Ctrl+Enter to save</span>
+        <button class="note-save" onclick="saveNote('${col}',${i})">Save note</button>
+      </div>
+    </div>`;
+  } else if (it.note) {
+    noteHtml = `<div class="item-note-view">${renderNoteHtml(it.note)}</div>`;
+  }
   const tags = (it.carried?`<span class="tag tag-carried">carried</span>`:'')
              + (it.ongoing?`<span class="tag tag-ongoing">ongoing</span>`:'');
   const ongoingStyle = it.ongoing?'color:var(--purple);':'';
@@ -548,7 +668,7 @@ function renderItem(col, it, i) {
 
 function renderResolved(section, it, i) {
   const isCancelled = section==='cancelled';
-  const noteHtml = it.note?`<div class="item-note-view">${esc(it.note)}</div>`:'';
+  const noteHtml = it.note?`<div class="item-note-view">${renderNoteHtml(it.note)}</div>`:'';
   const tags = it.carried?`<span class="tag tag-carried">carried</span>`:'';
   const textClass = isCancelled?'cancelled-text':'struck';
   const cancelTag = isCancelled?`<span class="tag tag-cancelled-label">cancelled</span>`:'';
@@ -587,11 +707,11 @@ function updateSummary(w) {
   L.push('Weekly update — '+getWeekLabel(weekOffset));
   L.push('');
   L.push(`Summary: ${w.doing.length} in progress, ${w.planned.length} planned, ${w.blocked.length} blocked, ${w.done.length} completed, ${w.cancelled.length} cancelled`);
-  if (w.doing.length) { L.push(''); L.push('IN PROGRESS'); w.doing.forEach(it=>{ L.push('  • '+it.text+(it.ongoing?' [ongoing]':'')+(it.carried?' [carried]':'')); if(it.note) L.push('    Note: '+it.note); }); }
-  if (w.planned.length) { L.push(''); L.push('PLANNED'); w.planned.forEach(it=>{ L.push('  • '+it.text+(it.ongoing?' [ongoing]':'')+(it.carried?' [carried]':'')); if(it.note) L.push('    Note: '+it.note); }); }
-  if (w.blocked.length) { L.push(''); L.push('BLOCKED'); w.blocked.forEach(it=>{ L.push('  • '+it.text+(it.ongoing?' [ongoing]':'')+(it.carried?' [carried]':'')); if(it.note) L.push('    Note: '+it.note); }); }
-  if (w.done.length) { L.push(''); L.push('COMPLETED'); w.done.forEach(it=>{ L.push('  • '+it.text); if(it.note) L.push('    Note: '+it.note); }); }
-  if (w.cancelled.length) { L.push(''); L.push('CANCELLED'); w.cancelled.forEach(it=>{ L.push('  • '+it.text); if(it.note) L.push('    Note: '+it.note); }); }
+  if (w.doing.length) { L.push(''); L.push('IN PROGRESS'); w.doing.forEach(it=>{ L.push('  • '+it.text+(it.ongoing?' [ongoing]':'')+(it.carried?' [carried]':'')); if(it.note) L.push('    Note: '+noteToPlainText(it.note)); }); }
+  if (w.planned.length) { L.push(''); L.push('PLANNED'); w.planned.forEach(it=>{ L.push('  • '+it.text+(it.ongoing?' [ongoing]':'')+(it.carried?' [carried]':'')); if(it.note) L.push('    Note: '+noteToPlainText(it.note)); }); }
+  if (w.blocked.length) { L.push(''); L.push('BLOCKED'); w.blocked.forEach(it=>{ L.push('  • '+it.text+(it.ongoing?' [ongoing]':'')+(it.carried?' [carried]':'')); if(it.note) L.push('    Note: '+noteToPlainText(it.note)); }); }
+  if (w.done.length) { L.push(''); L.push('COMPLETED'); w.done.forEach(it=>{ L.push('  • '+it.text); if(it.note) L.push('    Note: '+noteToPlainText(it.note)); }); }
+  if (w.cancelled.length) { L.push(''); L.push('CANCELLED'); w.cancelled.forEach(it=>{ L.push('  • '+it.text); if(it.note) L.push('    Note: '+noteToPlainText(it.note)); }); }
   el.textContent = L.join('\n').trim();
 }
 
