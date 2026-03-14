@@ -1,61 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Weekly Work Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
   :root {
-    --bg: #f7f6f3;
-    --surface: #ffffff;
-    --surface2: #f0ede8;
-    --border: rgba(0,0,0,0.10);
-    --border-mid: rgba(0,0,0,0.18);
-    --text: #1a1917;
-    --text-2: #6b6860;
-    --text-3: #a8a49e;
-    --green: #1a7a56;
-    --green-bg: #e8f5ef;
-    --blue: #1a5fa8;
-    --blue-bg: #e8f0fb;
-    --red: #b83232;
-    --red-bg: #fbeaea;
-    --amber: #9a6200;
-    --amber-bg: #fef3db;
-    --purple: #6b3fa0;
-    --purple-bg: #f0eafa;
+    --bg: #f7f6f3; --surface: #ffffff; --surface2: #f0ede8;
+    --border: rgba(0,0,0,0.10); --border-mid: rgba(0,0,0,0.18);
+    --text: #1a1917; --text-2: #6b6860; --text-3: #a8a49e;
+    --green: #1a7a56; --green-bg: #e8f5ef;
+    --blue: #1a5fa8; --blue-bg: #e8f0fb;
+    --red: #b83232; --red-bg: #fbeaea;
+    --amber: #9a6200; --amber-bg: #fef3db;
+    --purple: #6b3fa0; --purple-bg: #f0eafa;
     --grey: #6b6860;
-    --info-bg: #edf3fc;
-    --info-text: #1a5fa8;
-    --info-border: rgba(26,95,168,0.25);
-    --radius: 10px;
-    --radius-sm: 6px;
+    --info-bg: #edf3fc; --info-text: #1a5fa8; --info-border: rgba(26,95,168,0.25);
+    --radius: 10px; --radius-sm: 6px;
     --shadow: 0 1px 3px rgba(0,0,0,0.07);
   }
   [data-theme="dark"] {
-    --bg: #141312;
-    --surface: #1e1d1b;
-    --surface2: #272523;
-    --border: rgba(255,255,255,0.09);
-    --border-mid: rgba(255,255,255,0.15);
-    --text: #f0ede8;
-    --text-2: #9e9a94;
-    --text-3: #5c5955;
-    --green: #3ecf8e;
-    --green-bg: #0e2a1e;
-    --blue: #5b9cf6;
-    --blue-bg: #0d1f3c;
-    --red: #f07070;
-    --red-bg: #2d1212;
-    --amber: #f0b429;
-    --amber-bg: #2a1f05;
-    --purple: #b07ef5;
-    --purple-bg: #1e1030;
+    --bg: #141312; --surface: #1e1d1b; --surface2: #272523;
+    --border: rgba(255,255,255,0.09); --border-mid: rgba(255,255,255,0.15);
+    --text: #f0ede8; --text-2: #9e9a94; --text-3: #5c5955;
+    --green: #3ecf8e; --green-bg: #0e2a1e;
+    --blue: #5b9cf6; --blue-bg: #0d1f3c;
+    --red: #f07070; --red-bg: #2d1212;
+    --amber: #f0b429; --amber-bg: #2a1f05;
+    --purple: #b07ef5; --purple-bg: #1e1030;
     --grey: #9e9a94;
-    --info-bg: #0d1f3c;
-    --info-text: #5b9cf6;
-    --info-border: rgba(91,156,246,0.25);
+    --info-bg: #0d1f3c; --info-text: #5b9cf6; --info-border: rgba(91,156,246,0.25);
     --shadow: 0 1px 4px rgba(0,0,0,0.3);
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -69,12 +44,12 @@
   .btn { background: var(--surface); border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm); padding: 6px 12px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--text-2); cursor: pointer; transition: background 0.15s, color 0.15s; }
   .btn:hover { background: var(--surface2); color: var(--text); }
   .btn-primary { background: var(--text); color: var(--bg); border-color: transparent; }
-  .btn-primary:hover { opacity: 0.85; background: var(--text); color: var(--bg); }
+  .btn-primary:hover { opacity: 0.85; }
   .btn-sm { padding: 4px 9px; font-size: 12px; }
   .btn-icon { padding: 6px 9px; line-height: 1; }
 
   .week-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
-  .week-label { font-size: 14px; font-weight: 500; color: var(--text); min-width: 220px; }
+  .week-label { font-size: 14px; font-weight: 500; min-width: 220px; }
 
   .carry-banner { background: var(--info-bg); border: 0.5px solid var(--info-border); border-radius: var(--radius-sm); padding: 9px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--info-text); gap: 10px; }
   .carry-banner button { background: none; border: 0.5px solid var(--info-border); border-radius: var(--radius-sm); padding: 3px 10px; font-size: 12px; color: var(--info-text); cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
@@ -84,10 +59,8 @@
   .total-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow); }
   .total-label { font-size: 11px; color: var(--text-2); display: flex; align-items: center; gap: 5px; }
   .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .dot-doing { background: var(--green); }
-  .dot-planned { background: var(--blue); }
-  .dot-blocked { background: var(--red); }
-  .dot-done { background: var(--grey); }
+  .dot-doing { background: var(--green); } .dot-planned { background: var(--blue); }
+  .dot-blocked { background: var(--red); } .dot-done { background: var(--grey); }
   .dot-cancelled { background: var(--amber); }
   .total-num { font-size: 20px; font-weight: 500; font-family: 'DM Mono', monospace; }
 
@@ -95,20 +68,17 @@
   .col { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); }
   .col-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
   .col-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-  .cdoing { background: var(--green); }
-  .cplanned { background: var(--blue); }
-  .cblocked { background: var(--red); }
-  .cdone { background: var(--grey); }
+  .cdoing { background: var(--green); } .cplanned { background: var(--blue); }
+  .cblocked { background: var(--red); } .cdone { background: var(--grey); }
   .ccancelled { background: var(--amber); }
-  .col-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .col-title { font-size: 13px; font-weight: 500; }
   .col-sub { font-size: 11px; color: var(--text-3); }
 
   .items { display: flex; flex-direction: column; gap: 5px; min-height: 40px; }
   .empty { font-size: 12px; color: var(--text-3); padding: 6px 0; font-style: italic; }
 
   .item { background: var(--surface2); border-radius: var(--radius-sm); padding: 7px 9px; border-left: 2.5px solid transparent; }
-  .item-doing { border-color: var(--green); }
-  .item-planned { border-color: var(--blue); }
+  .item-doing { border-color: var(--green); } .item-planned { border-color: var(--blue); }
   .item-blocked { border-color: var(--red); }
   .item-done-s { border-color: var(--grey); opacity: 0.6; }
   .item-cancelled-s { border-color: var(--amber); opacity: 0.65; }
@@ -123,12 +93,19 @@
   .tag-ongoing { background: var(--purple-bg); color: var(--purple); }
   .tag-cancelled-label { background: var(--amber-bg); color: var(--amber); }
 
-  .item-btns { display: flex; gap: 2px; flex-shrink: 0; }
+  .item-btns { display: flex; gap: 2px; flex-shrink: 0; align-items: center; }
   .ibt { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 13px; padding: 1px 3px; line-height: 1; font-family: 'DM Sans', sans-serif; border-radius: 4px; transition: color 0.1s, background 0.1s; }
   .ibt:hover { color: var(--text); background: rgba(128,128,128,0.1); }
   .ibt.del:hover { color: var(--red); }
   .ibt.tick:hover { color: var(--green); }
   .ibt.xbtn:hover { color: var(--amber); }
+
+  .move-wrap { position: relative; display: inline-block; }
+  .move-menu { display: none; position: absolute; right: 0; top: 100%; background: var(--surface); border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm); box-shadow: 0 4px 12px rgba(0,0,0,0.12); z-index: 50; min-width: 140px; padding: 4px 0; }
+  .move-menu.open { display: block; }
+  .move-opt { display: block; width: 100%; background: none; border: none; padding: 7px 12px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--text-2); cursor: pointer; text-align: left; white-space: nowrap; }
+  .move-opt:hover { background: var(--surface2); color: var(--text); }
+  .move-opt .move-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 7px; vertical-align: middle; }
 
   .item-note-view { font-size: 12px; color: var(--text-2); margin-top: 5px; padding-top: 5px; border-top: 0.5px solid var(--border); line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
   .item-note-edit { width: 100%; margin-top: 5px; font-size: 12px; border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm); padding: 5px 8px; background: var(--surface); color: var(--text); resize: vertical; min-height: 50px; font-family: 'DM Sans', sans-serif; outline: none; }
@@ -149,21 +126,34 @@
   .section-clear:hover { color: var(--red); background: var(--red-bg); }
   .section-body { margin-top: 10px; }
 
-  .hint-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
-  .hint { font-size: 11px; color: var(--text-3); display: flex; align-items: center; gap: 5px; }
+  .hint-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+  .hint { font-size: 11px; color: var(--text-3); display: flex; align-items: center; gap: 4px; }
 
   .summary-box { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); }
   .summary-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   .summary-label { font-size: 12px; font-weight: 500; color: var(--text-2); letter-spacing: 0.04em; text-transform: uppercase; }
   .summary-text { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text); white-space: pre-wrap; line-height: 1.75; }
 
-  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: center; justify-content: center; }
+  /* ── Modals ── */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: flex-start; justify-content: center; padding: 2rem 1rem; overflow-y: auto; }
   .modal-bg.open { display: flex; }
-  .modal { background: var(--surface); border: 0.5px solid var(--border-mid); border-radius: var(--radius); padding: 20px; width: 460px; max-width: 95vw; }
-  .modal-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; color: var(--text); }
-  .modal-sub { font-size: 12px; color: var(--text-3); margin-bottom: 12px; }
+  .modal { background: var(--surface); border: 0.5px solid var(--border-mid); border-radius: var(--radius); padding: 24px; width: 560px; max-width: 95vw; margin: auto; }
+  .modal-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; color: var(--text); }
+  .modal-sub { font-size: 12px; color: var(--text-3); margin-bottom: 16px; }
   .modal textarea { width: 100%; height: 140px; font-size: 12px; font-family: 'DM Mono', monospace; border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm); padding: 8px; background: var(--surface2); color: var(--text); resize: vertical; outline: none; }
-  .modal-actions { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+
+  /* How to use modal styles */
+  .help-section { margin-bottom: 20px; }
+  .help-section:last-of-type { margin-bottom: 0; }
+  .help-heading { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 0.5px solid var(--border); }
+  .help-grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: start; }
+  .help-icon { font-size: 13px; color: var(--text-2); padding-top: 1px; white-space: nowrap; font-family: 'DM Mono', monospace; }
+  .help-desc { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+  .help-para { font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 6px; }
+  .help-para:last-child { margin-bottom: 0; }
+  .help-tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .help-tag { font-size: 11px; border-radius: 4px; padding: 2px 7px; }
 
   .copy-ok { font-size: 12px; color: var(--green); margin-left: 8px; opacity: 0; transition: opacity 0.3s; }
   .copy-ok.show { opacity: 1; }
@@ -179,6 +169,7 @@
   <div class="app-header">
     <div class="app-title">Weekly tracker</div>
     <div class="header-actions">
+      <button class="btn btn-sm" onclick="openHelp()">How to use</button>
       <button class="btn btn-sm" onclick="exportData()">Export JSON</button>
       <button class="btn btn-sm" onclick="openImport()">Import JSON</button>
       <button class="btn btn-sm btn-icon" onclick="toggleTheme()" title="Toggle dark mode">&#9788;</button>
@@ -205,15 +196,12 @@
   </div>
 
   <div class="hint-row">
-    <span class="hint">&#10003; = complete</span>
-    <span class="hint">&#10007; = cancel</span>
-    <span class="hint">&#9671; = mark ongoing (auto carry-over each week)</span>
-    <span class="hint">&#43;&#9650; = add note</span>
+    <span class="hint">&#10003; complete &nbsp;&#10007; cancel &nbsp;&#8594; move column &nbsp;&#9671; ongoing &nbsp;&#43;&#9650; note</span>
   </div>
 
   <div class="columns">
     <div class="col">
-      <div class="col-head"><div class="col-dot cdoing"></div><div><div class="col-title">In progress</div><div class="col-sub">What I'm working on now</div></div></div>
+      <div class="col-head"><div class="col-dot cdoing"></div><div><div class="col-title">In progress</div><div class="col-sub">What I'm working on this week</div></div></div>
       <div class="items" id="list-doing"></div>
       <div class="add-row"><input class="add-in" id="in-doing" placeholder="Add task…" onkeydown="if(event.key==='Enter')addItem('doing')" /><button class="add-btn" onclick="addItem('doing')">+</button></div>
     </div>
@@ -233,24 +221,20 @@
     <div class="section-head" onclick="toggleSection('done')">
       <div class="col-dot cdone"></div>
       <div><div class="col-title">Completed</div><div class="col-sub">Finished this week</div></div>
-      <span class="section-clear" onclick="event.stopPropagation();clearSection('done')" title="Remove all completed">Clear all</span>
+      <span class="section-clear" onclick="event.stopPropagation();clearSection('done')">Clear all</span>
       <span class="section-toggle" id="tog-done">&#9660;</span>
     </div>
-    <div class="section-body" id="body-done">
-      <div class="items" id="list-done"></div>
-    </div>
+    <div class="section-body" id="body-done"><div class="items" id="list-done"></div></div>
   </div>
 
   <div class="lower-section">
     <div class="section-head" onclick="toggleSection('cancelled')">
       <div class="col-dot ccancelled"></div>
       <div><div class="col-title">Cancelled</div><div class="col-sub">Tasks dropped or outside your control</div></div>
-      <span class="section-clear" onclick="event.stopPropagation();clearSection('cancelled')" title="Remove all cancelled">Clear all</span>
+      <span class="section-clear" onclick="event.stopPropagation();clearSection('cancelled')">Clear all</span>
       <span class="section-toggle" id="tog-cancelled">&#9660;</span>
     </div>
-    <div class="section-body" id="body-cancelled">
-      <div class="items" id="list-cancelled"></div>
-    </div>
+    <div class="section-body" id="body-cancelled"><div class="items" id="list-cancelled"></div></div>
   </div>
 
   <div class="summary-box">
@@ -265,10 +249,86 @@
   </div>
 </div>
 
-<div class="modal-bg" id="import-modal">
-  <div class="modal">
+<!-- How to use modal -->
+<div class="modal-bg" id="help-modal" onclick="closeHelp(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">How to use the weekly tracker</div>
+    <div class="modal-sub">A quick guide to getting the most out of your tracker.</div>
+
+    <div class="help-section">
+      <div class="help-heading">The three columns</div>
+      <p class="help-para">Each working week is organised into three columns. Add tasks to whichever column fits best — you can always move them later.</p>
+      <div class="help-grid">
+        <span class="help-icon" style="color:var(--green);">&#9679; In progress</span>
+        <span class="help-desc">Tasks you are actively working on right now.</span>
+        <span class="help-icon" style="color:var(--blue);">&#9679; Planned</span>
+        <span class="help-desc">Tasks you intend to start this week but haven't yet.</span>
+        <span class="help-icon" style="color:var(--red);">&#9679; Blocked</span>
+        <span class="help-desc">Tasks you cannot progress because something or someone is in the way. Use the notes feature to explain what the blocker is.</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-heading">Task buttons</div>
+      <div class="help-grid">
+        <span class="help-icon">&#10003;</span>
+        <span class="help-desc">Mark a task as completed. It moves to the Completed section at the bottom.</span>
+        <span class="help-icon">&#10007;</span>
+        <span class="help-desc">Mark a task as cancelled — for work that has been dropped or is no longer needed, often for reasons outside your control.</span>
+        <span class="help-icon">&#8594;</span>
+        <span class="help-desc">Move a task to a different column. For example, move a planned task to Blocked if it hits a problem, or move a blocked task back to In progress once the blocker is resolved.</span>
+        <span class="help-icon">&#9671;</span>
+        <span class="help-desc">Mark a task as ongoing. Ongoing tasks automatically carry over to the next week without any manual action. The diamond turns solid (&#9670;) when active. Use this for long-running work that spans several weeks or months.</span>
+        <span class="help-icon">+&#9650;</span>
+        <span class="help-desc">Add or edit a note on a task. Use this to give context — such as what is causing a blocker, where a task is up to, or any relevant detail for your manager.</span>
+        <span class="help-icon">&#8617;</span>
+        <span class="help-desc">Restore a completed or cancelled task back to its original column if you marked it by mistake.</span>
+        <span class="help-icon">&#x2715;</span>
+        <span class="help-desc">Permanently delete a task. This cannot be undone.</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-heading">Tags</div>
+      <p class="help-para">Tags appear automatically on tasks to show their history at a glance.</p>
+      <div class="help-tag-row">
+        <span class="help-tag tag-carried">carried</span>
+        <span class="help-desc" style="font-size:12px;color:var(--text-2);padding-top:2px;">This task was carried over from a previous week.</span>
+      </div>
+      <div class="help-tag-row" style="margin-top:6px;">
+        <span class="help-tag tag-ongoing">ongoing</span>
+        <span class="help-desc" style="font-size:12px;color:var(--text-2);padding-top:2px;">This task will automatically carry over each week until marked complete or cancelled.</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-heading">Navigating weeks</div>
+      <p class="help-para">Use the arrows at the top to move between weeks. Each week's tasks are stored separately, so you can look back at previous weeks at any time.</p>
+      <p class="help-para">If you have incomplete tasks from a previous week, a blue banner will appear at the top offering to carry them all over to the current week in one click.</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-heading">Manager update</div>
+      <p class="help-para">The manager update preview at the bottom of the page builds automatically as you add tasks. When you're ready, click <strong>Copy update</strong> to copy the formatted text to your clipboard and paste it into an email, Teams message, or Slack.</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-heading">Saving your data</div>
+      <p class="help-para">Your data saves automatically to your browser's local storage every time you make a change. As long as you use the same browser on the same device, your tasks will be there when you return.</p>
+      <p class="help-para">Use <strong>Export JSON</strong> to download a backup of all your data at any time. Use <strong>Import JSON</strong> to restore from a backup or move your data to a different device.</p>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="closeHelpBtn()">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import modal -->
+<div class="modal-bg" id="import-modal" onclick="closeImport()">
+  <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-title">Import JSON</div>
-    <div class="modal-sub">Paste a previously exported JSON file to restore your data.</div>
+    <div class="modal-sub">Paste a previously exported JSON file to restore your data. This will overwrite your current data.</div>
     <textarea id="import-ta" placeholder="Paste exported JSON here…"></textarea>
     <div class="modal-actions">
       <button class="btn" onclick="closeImport()">Cancel</button>
@@ -283,13 +343,20 @@ let currentKey = '';
 let weekOffset = 0;
 const sectionOpen = { done: true, cancelled: true };
 const editing = {};
+const COLS = ['doing', 'planned', 'blocked'];
+const COL_LABELS = { doing: 'In progress', planned: 'Planned', blocked: 'Blocked' };
+const COL_COLORS = { doing: 'var(--green)', planned: 'var(--blue)', blocked: 'var(--red)' };
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.move-menu.open').forEach(m => m.classList.remove('open'));
+});
 
 function save() {
-  try { localStorage.setItem('wt3_data', JSON.stringify({ weeks, weekOffset })); } catch(e) {}
+  try { localStorage.setItem('wt5_data', JSON.stringify({ weeks, weekOffset })); } catch(e) {}
 }
 function load() {
   try {
-    const raw = localStorage.getItem('wt3_data');
+    const raw = localStorage.getItem('wt5_data');
     if (!raw) return;
     const d = JSON.parse(raw);
     if (d.weeks) Object.assign(weeks, d.weeks);
@@ -300,11 +367,15 @@ function load() {
 function toggleTheme() {
   const dark = document.documentElement.getAttribute('data-theme') === 'dark';
   document.documentElement.setAttribute('data-theme', dark ? '' : 'dark');
-  try { localStorage.setItem('wt3_theme', dark ? 'light' : 'dark'); } catch(e) {}
+  try { localStorage.setItem('wt5_theme', dark ? 'light' : 'dark'); } catch(e) {}
 }
 (function(){
-  try { if (localStorage.getItem('wt3_theme') === 'dark') document.documentElement.setAttribute('data-theme','dark'); } catch(e) {}
+  try { if (localStorage.getItem('wt5_theme') === 'dark') document.documentElement.setAttribute('data-theme','dark'); } catch(e) {}
 })();
+
+function openHelp() { document.getElementById('help-modal').classList.add('open'); }
+function closeHelp(e) { if(e.target === document.getElementById('help-modal')) document.getElementById('help-modal').classList.remove('open'); }
+function closeHelpBtn() { document.getElementById('help-modal').classList.remove('open'); }
 
 function exportData() {
   const blob = new Blob([JSON.stringify({ weeks, weekOffset }, null, 2)], { type: 'application/json' });
@@ -348,7 +419,7 @@ function checkCarry() {
   const bar = document.getElementById('carry-banner');
   const prevKeys = Object.keys(weeks).filter(k => k < currentKey);
   let total = 0;
-  prevKeys.forEach(k => { const w = weeks[k]; total += w.doing.length + w.planned.length + w.blocked.length; });
+  prevKeys.forEach(k => { const w=weeks[k]; total += w.doing.length+w.planned.length+w.blocked.length; });
   if (total > 0) {
     bar.style.display = 'flex';
     document.getElementById('carry-msg').textContent = `${total} incomplete task${total>1?'s':''} from a previous week.`;
@@ -359,26 +430,23 @@ function carryOver() {
   const cur = getOrCreate(currentKey);
   prevKeys.forEach(k => {
     const w = weeks[k];
-    ['doing','planned','blocked'].forEach(col => {
+    COLS.forEach(col => {
       w[col].forEach(it => cur[col].push({ text:it.text, note:it.note||'', carried:true, ongoing:it.ongoing||false }));
       w[col] = [];
     });
   });
   save(); document.getElementById('carry-banner').style.display='none'; render();
 }
-
-// Auto carry ongoing tasks when moving forward a week
 function autoCarryOngoing(fromKey, toKey) {
   const from = weeks[fromKey]; if (!from) return;
   const to = getOrCreate(toKey);
-  ['doing','planned','blocked'].forEach(col => {
-    from[col].filter(it => it.ongoing).forEach(it => {
-      const already = to[col].some(x => x.text === it.text && x.ongoing);
+  COLS.forEach(col => {
+    from[col].filter(it=>it.ongoing).forEach(it => {
+      const already = to[col].some(x=>x.text===it.text&&x.ongoing);
       if (!already) to[col].push({ text:it.text, note:it.note||'', carried:true, ongoing:true });
     });
   });
 }
-
 function changeWeek(dir) {
   const oldKey = weekKey(weekOffset);
   weekOffset += dir;
@@ -396,6 +464,12 @@ function addItem(col) {
 }
 function removeItem(col, i) {
   getOrCreate(currentKey)[col].splice(i,1); delete editing[col+i]; save(); render();
+}
+function moveItem(fromCol, i, toCol) {
+  if (fromCol===toCol) return;
+  const w = getOrCreate(currentKey);
+  const it = w[fromCol].splice(i,1)[0];
+  w[toCol].push(it); save(); render();
 }
 function markDone(col, i) {
   const w = getOrCreate(currentKey), it = w[col].splice(i,1)[0];
@@ -419,21 +493,26 @@ function clearSection(section) {
   getOrCreate(currentKey)[section] = []; save(); render();
 }
 function toggleOngoing(col, i) {
-  const it = getOrCreate(currentKey)[col][i]; it.ongoing = !it.ongoing; save(); render();
+  const it = getOrCreate(currentKey)[col][i]; it.ongoing=!it.ongoing; save(); render();
 }
 function toggleNote(col, i) {
-  const k = col+i; editing[k] = !editing[k]; render();
-  if (editing[k]) { const ta = document.getElementById('nte-'+k); if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);} }
+  const k=col+i; editing[k]=!editing[k]; render();
+  if (editing[k]) { const ta=document.getElementById('nte-'+k); if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);} }
 }
 function saveNote(col, i) {
   const k=col+i, ta=document.getElementById('nte-'+k);
-  if(ta) getOrCreate(currentKey)[col][i].note = ta.value;
+  if(ta) getOrCreate(currentKey)[col][i].note=ta.value;
   editing[k]=false; save(); render();
 }
+function toggleMoveMenu(e, id) {
+  e.stopPropagation();
+  document.querySelectorAll('.move-menu.open').forEach(m => { if(m.id!==id) m.classList.remove('open'); });
+  document.getElementById(id).classList.toggle('open');
+}
 function toggleSection(sec) {
-  sectionOpen[sec] = !sectionOpen[sec];
-  document.getElementById('body-'+sec).style.display = sectionOpen[sec]?'block':'none';
-  document.getElementById('tog-'+sec).innerHTML = sectionOpen[sec]?'&#9660;':'&#9654;';
+  sectionOpen[sec]=!sectionOpen[sec];
+  document.getElementById('body-'+sec).style.display=sectionOpen[sec]?'block':'none';
+  document.getElementById('tog-'+sec).innerHTML=sectionOpen[sec]?'&#9660;':'&#9654;';
 }
 
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -445,29 +524,37 @@ function renderItem(col, it, i) {
     : it.note ? `<div class="item-note-view">${esc(it.note)}</div>` : '';
   const tags = (it.carried?`<span class="tag tag-carried">carried</span>`:'')
              + (it.ongoing?`<span class="tag tag-ongoing">ongoing</span>`:'');
-  const ongoingStyle = it.ongoing ? 'color:var(--purple);' : '';
+  const ongoingStyle = it.ongoing?'color:var(--purple);':'';
+  const menuId = `mm-${col}-${i}`;
+  const moveOpts = COLS.filter(c=>c!==col).map(c =>
+    `<button class="move-opt" onclick="moveItem('${col}',${i},'${c}');event.stopPropagation()"><span class="move-dot" style="background:${COL_COLORS[c]}"></span>${COL_LABELS[c]}</button>`
+  ).join('');
   return `<div class="item item-${col}">
     <div class="item-top">
       <span class="item-text">${esc(it.text)}${tags}</span>
       <div class="item-btns">
-        <button class="ibt tick" title="Mark complete" onclick="markDone('${col}',${i})">&#10003;</button>
+        <button class="ibt tick" title="Mark as complete" onclick="markDone('${col}',${i})">&#10003;</button>
         <button class="ibt xbtn" title="Mark as cancelled" onclick="markCancelled('${col}',${i})">&#10007;</button>
-        <button class="ibt" title="${it.ongoing?'Remove ongoing flag':'Mark as ongoing — auto carries to next week'}" onclick="toggleOngoing('${col}',${i})" style="${ongoingStyle}">${it.ongoing?'&#9670;':'&#9671;'}</button>
-        <button class="ibt" title="${isEd?'Cancel note':'Add/edit note'}" onclick="toggleNote('${col}',${i})">${isEd?'&#x2715;':(it.note?'&#9998;':'&#43;&#9650;')}</button>
+        <div class="move-wrap">
+          <button class="ibt" title="Move to another column" onclick="toggleMoveMenu(event,'${menuId}')">&#8594;</button>
+          <div class="move-menu" id="${menuId}">${moveOpts}</div>
+        </div>
+        <button class="ibt" title="${it.ongoing?'Remove ongoing flag':'Mark as ongoing — carries over each week automatically'}" onclick="toggleOngoing('${col}',${i})" style="${ongoingStyle}">${it.ongoing?'&#9670;':'&#9671;'}</button>
+        <button class="ibt" title="${isEd?'Cancel note':'Add or edit note'}" onclick="toggleNote('${col}',${i})">${isEd?'&#x2715;':(it.note?'&#9998;':'&#43;&#9650;')}</button>
         <button class="ibt del" title="Delete permanently" onclick="removeItem('${col}',${i})">&#x2715;</button>
       </div>
     </div>${noteHtml}</div>`;
 }
 
 function renderResolved(section, it, i) {
-  const isCancelled = section === 'cancelled';
-  const noteHtml = it.note ? `<div class="item-note-view">${esc(it.note)}</div>` : '';
-  const tags = it.carried ? `<span class="tag tag-carried">carried</span>` : '';
-  const textClass = isCancelled ? 'cancelled-text' : 'struck';
-  const cancelledTag = isCancelled ? `<span class="tag tag-cancelled-label">cancelled</span>` : '';
+  const isCancelled = section==='cancelled';
+  const noteHtml = it.note?`<div class="item-note-view">${esc(it.note)}</div>`:'';
+  const tags = it.carried?`<span class="tag tag-carried">carried</span>`:'';
+  const textClass = isCancelled?'cancelled-text':'struck';
+  const cancelTag = isCancelled?`<span class="tag tag-cancelled-label">cancelled</span>`:'';
   return `<div class="item ${isCancelled?'item-cancelled-s':'item-done-s'}">
     <div class="item-top">
-      <span class="item-text ${textClass}">${esc(it.text)}${tags}${cancelledTag}</span>
+      <span class="item-text ${textClass}">${esc(it.text)}${tags}${cancelTag}</span>
       <div class="item-btns">
         <button class="ibt" title="Restore to active" onclick="restoreItem('${section}',${i})" style="font-size:14px;">&#8617;</button>
         <button class="ibt del" title="Remove permanently" onclick="removeResolved('${section}',${i})">&#x2715;</button>
@@ -477,7 +564,7 @@ function renderResolved(section, it, i) {
 
 function render() {
   const w = getOrCreate(currentKey);
-  ['doing','planned','blocked'].forEach(col => {
+  COLS.forEach(col => {
     document.getElementById('cnt-'+col).textContent = w[col].length;
     const el = document.getElementById('list-'+col);
     el.innerHTML = w[col].length===0 ? '<div class="empty">Nothing here yet</div>'
@@ -495,7 +582,7 @@ function render() {
 function updateSummary(w) {
   const total = w.doing.length+w.planned.length+w.blocked.length+w.done.length+w.cancelled.length;
   const el = document.getElementById('summary');
-  if (total===0) { el.textContent='Add items above to generate your update.'; return; }
+  if (total===0) { el.textContent='Add tasks above to generate your update.'; return; }
   const L=[];
   L.push('Weekly update — '+getWeekLabel(weekOffset));
   L.push('');
@@ -510,9 +597,9 @@ function updateSummary(w) {
 
 function copyUpdate() {
   const txt = document.getElementById('summary').textContent;
-  if (!txt || txt==='Add items above to generate your update.') return;
+  if (!txt||txt==='Add tasks above to generate your update.') return;
   navigator.clipboard.writeText(txt).then(()=>{
-    const el = document.getElementById('copy-ok');
+    const el=document.getElementById('copy-ok');
     el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2000);
   });
 }
