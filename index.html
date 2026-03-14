@@ -494,6 +494,31 @@ function toggleSec(sec){
 }
 
 // ── Note formatting ───────────────────────────────────────
+function handleNoteKey(e,col,i){
+  const ta=e.target;
+  // Cmd/Ctrl+Enter saves the note
+  if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();saveNote(col,i);return;}
+  // Plain Enter — if current line starts with a bullet, continue the list
+  if(e.key==='Enter'&&!e.metaKey&&!e.ctrlKey){
+    const pos=ta.selectionStart,val=ta.value;
+    const lineStart=val.lastIndexOf('\n',pos-1)+1;
+    const lineContent=val.substring(lineStart,pos);
+    if(lineContent.startsWith('• ')){
+      e.preventDefault();
+      // If the line is just a bullet with nothing after it, remove the bullet and stop the list
+      if(lineContent==='• '){
+        ta.value=val.substring(0,lineStart)+val.substring(pos);
+        ta.selectionStart=ta.selectionEnd=lineStart;
+      }else{
+        // Insert newline + bullet
+        const insert='\n• ';
+        ta.value=val.substring(0,pos)+insert+val.substring(pos);
+        ta.selectionStart=ta.selectionEnd=pos+insert.length;
+      }
+    }
+  }
+}
+
 function insertBullet(id){
   const ta=document.getElementById(id);if(!ta)return;
   const s=ta.selectionStart,val=ta.value;
@@ -562,7 +587,7 @@ function renderItem(col,it,i){
         <div class="ntb-sep"></div>
         <button class="ntb-btn" style="text-decoration:line-through" onclick="insertStrike('${tid}')">S</button>
       </div>
-      <textarea class="note-area" id="${tid}" onkeydown="if(event.key==='Enter'&&(event.metaKey||event.ctrlKey))saveNote('${col}',${i})">${esc(it.note)}</textarea>
+      <textarea class="note-area" id="${tid}" onkeydown="handleNoteKey(event,'${col}',${i})">${esc(it.note)}</textarea>
       <div class="note-ft">
         <span class="note-hint">Cmd/Ctrl+Enter to save</span>
         <button class="note-sv" onclick="saveNote('${col}',${i})">Save note</button>
