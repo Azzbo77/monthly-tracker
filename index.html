@@ -345,6 +345,9 @@ const editing={};
 let currentKey='',weekOffset=0;
 
 // ── Modal wiring (no inline onclick on modal-bg) ──────────
+// Initialise immediately so currentKey is set before any button clicks
+load();init();
+
 document.addEventListener('DOMContentLoaded',()=>{
   // Help modal
   document.getElementById('help-close-btn').addEventListener('click',()=>closeModal('help-modal'));
@@ -357,7 +360,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.addEventListener('click',()=>{
     document.querySelectorAll('.mv-menu.open').forEach(m=>m.classList.remove('open'));
   });
-  load();init();
 });
 
 function openModal(id){document.getElementById(id).classList.add('open')}
@@ -544,7 +546,7 @@ function renderNoteHtml(raw){
 function noteToUpdateLines(raw){
   if(!raw)return[];
   return raw.split('\n').filter(l=>l.trim()).map(l=>{
-    const cleaned=l.trim().replace(/~~(.*?)~~/g,'[Done: $1]').trim();
+    const cleaned=l.trim().replace(/~~(.*?)~~/g,'$1 [done]').trim();
     return cleaned?'      '+cleaned:null;
   }).filter(Boolean);
 }
