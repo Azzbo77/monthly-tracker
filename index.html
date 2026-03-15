@@ -108,13 +108,14 @@
   .mv-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:middle}
 
   /* note editor */
-  .note-ed{margin-top:6px;border:.5px solid var(--border-mid);border-radius:var(--rs);overflow:hidden}
+  .note-ed{margin-top:6px;border:.5px solid var(--border-mid);border-radius:var(--rs);overflow:visible}
   .note-tb{display:flex;gap:2px;padding:4px 6px;background:var(--surface);border-bottom:.5px solid var(--border)}
   .ntb-btn{background:none;border:none;cursor:pointer;color:var(--text-2);font-size:12px;padding:3px 7px;border-radius:4px;font-family:'DM Sans',sans-serif;line-height:1.2;transition:background .1s,color .1s;font-weight:400}
   .ntb-btn:hover{background:var(--surface2);color:var(--text)}
   .ntb-sep{width:.5px;background:var(--border-mid);margin:2px 4px}
   .note-area{width:100%;font-size:12px;border:none;padding:7px 9px;background:var(--surface);color:var(--text);resize:vertical;min-height:60px;font-family:'DM Sans',sans-serif;outline:none;display:block;font-weight:400}
-  .note-ft{display:flex;align-items:center;justify-content:space-between;padding:4px 6px;background:var(--surface);border-top:.5px solid var(--border)}
+  .note-ft{display:flex;flex-direction:column;gap:6px;padding:6px 8px;background:var(--surface);border-top:.5px solid var(--border)}
+  .note-ft-actions{display:flex;align-items:center;justify-content:space-between}
   .note-hint{font-size:10px;color:var(--text-3)}
   .note-sv{font-size:11px;padding:3px 10px;background:var(--text);color:var(--bg);border:none;border-radius:var(--rs);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:400}
   .note-sv:hover{opacity:.85}
@@ -124,6 +125,16 @@
   .note-view ul{list-style:disc;padding-left:16px;margin:2px 0}
   .note-view li{margin:1px 0}
   .note-view s{color:var(--text-3)}
+
+  /* progress */
+  .prog-wrap{margin-top:5px;display:flex;align-items:center;gap:8px}
+  .prog-bar-bg{flex:1;height:5px;background:var(--border-mid);border-radius:3px;overflow:hidden}
+  .prog-bar-fill{height:100%;border-radius:3px;transition:width .2s}
+  .prog-pct{font-size:11px;font-weight:500;color:var(--text-2);min-width:28px;text-align:right}
+  .prog-input-wrap{margin-top:6px;display:flex;align-items:center;gap:8px}
+  .prog-input-wrap label{font-size:11px;color:var(--text-2)}
+  .prog-input{width:60px;font-size:12px;border:.5px solid var(--border-mid);border-radius:var(--rs);padding:3px 7px;background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;outline:none;text-align:center}
+  .prog-input:focus{border-color:var(--blue)}
 
   /* add row */
   .add-row{display:flex;gap:5px;margin-top:8px}
@@ -173,9 +184,12 @@
   .copy-ok{font-size:12px;color:var(--green);margin-left:8px;opacity:0;transition:opacity .3s}
   .copy-ok.show{opacity:1}
 
+  /* toast */
+  .toast{position:fixed;bottom:24px;right:24px;z-index:300;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.25);display:flex;align-items:center;gap:16px;max-width:380px;padding:12px 20px;font-size:13px;font-weight:500}
+
   /* date picker */
   .note-tb{position:relative}
-  .date-picker{position:fixed;background:var(--surface);border:.5px solid var(--border-mid);border-radius:var(--rs);box-shadow:0 4px 16px rgba(0,0,0,.25);z-index:150;padding:14px;display:none;flex-direction:column;gap:10px;width:280px;max-width:90vw}
+  .date-picker{position:absolute;top:100%;left:0;background:var(--surface);border:.5px solid var(--border-mid);border-radius:var(--rs);box-shadow:0 4px 16px rgba(0,0,0,.25);z-index:250;padding:14px;display:none;flex-direction:column;gap:10px;width:280px;max-width:90vw}
   .date-picker.open{display:flex}
   .dp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding-bottom:8px;border-bottom:.5px solid var(--border)}
   .dp-title{font-size:13px;font-weight:500;color:var(--text)}
@@ -207,6 +221,7 @@
       <button class="btn btn-sm" onclick="exportData()" aria-label="Export all data as JSON file">Export JSON</button>
       <button class="btn btn-sm" onclick="openImport()" aria-label="Import previously exported JSON">Import JSON</button>
       <button class="btn btn-ic" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle light/dark theme">&#9788;</button>
+      <input type="text" id="global-search" placeholder="Search all tasks…" style="width:180px;padding:5px 9px;font-size:13px;border:.5px solid var(--border-mid);border-radius:var(--rs);background:var(--surface);color:var(--text);outline:none;" oninput="performGlobalSearch(this.value)">
     </div>
   </div>
 
@@ -338,7 +353,7 @@
         <span class="h-ic">&#10007;</span><span class="h-ds">Mark as cancelled — for work dropped or outside your control.</span>
         <span class="h-ic">&#8594;</span><span class="h-ds">Move to a different column — e.g. move a planned task to Blocked, or a blocked task back to In progress.</span>
         <span class="h-ic">&#9671;</span><span class="h-ds">Mark as ongoing — automatically carries over to the next week. Turns solid (&#9670;) when active. Use for long-running work spanning weeks or months.</span>
-        <span class="h-ic">+&#9650;</span><span class="h-ds">Add or edit a note. Notes support bullet points and strikethrough formatting.</span>
+        <span class="h-ic">+&#9650;</span><span class="h-ds">Add or edit a note. Notes support bullet points, strikethrough formatting, and a percentage complete field. The progress bar appears on the task card and pulls through to the manager update and PDF export.</span>
         <span class="h-ic">&#8617;</span><span class="h-ds">Restore a completed or cancelled task back to its original column.</span>
         <span class="h-ic">&#x2715;</span><span class="h-ds">Permanently delete a task. This cannot be undone.</span>
       </div>
@@ -389,6 +404,16 @@
   </div>
 </div>
 
+<div class="modal-bg" id="search-modal" role="dialog" aria-modal="true">
+  <div class="modal" style="width:640px;max-width:95vw">
+    <div class="modal-title">Search Results</div>
+    <div style="margin:16px 0;max-height:60vh;overflow-y:auto" id="search-results"></div>
+    <div class="modal-acts">
+      <button class="btn btn-p" onclick="closeModal('search-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── State ─────────────────────────────────────────────────
 const weeks={},COLS=['doing','planned','blocked'];
@@ -401,6 +426,38 @@ let currentKey='',weekOffset=0;
 // ── Storage keys ──────────────────────────────────────────
 const STORAGE_KEY='wt8';
 const STORAGE_THEME='wt8_theme';
+
+// ── Toast notifications ───────────────────────────────────
+// Centralised toast utility — replaces all inline alert() and ad-hoc toast blocks.
+// type: 'success' (green) | 'warning' (amber) | 'error' (red) | 'info' (blue)
+// actionLabel/actionFn: optional inline action button (e.g. Undo)
+function showToast(message, type='info', actionLabel=null, actionFn=null, duration=10000){
+  const colors={
+    success:{bg:'var(--green)',text:'#fff',btn:'rgba(255,255,255,0.2)'},
+    warning:{bg:'var(--amber)',text:'#fff',btn:'rgba(255,255,255,0.2)'},
+    error:  {bg:'var(--red)',  text:'#fff',btn:'rgba(255,255,255,0.2)'},
+    info:   {bg:'var(--blue)', text:'#fff',btn:'rgba(255,255,255,0.2)'},
+  };
+  const c=colors[type]||colors.info;
+  document.querySelectorAll('.toast').forEach(el=>el.remove());
+  const t=document.createElement('div');
+  t.setAttribute('role','alert');
+  t.setAttribute('aria-live','polite');
+  t.className='toast';
+  t.style.cssText=`background:${c.bg};color:${c.text};`;
+  t.innerHTML=`<span style="flex:1">${message}</span>`
+    +(actionLabel?`<button style="background:${c.btn};color:${c.text};border:1px solid rgba(255,255,255,0.4);padding:5px 12px;border-radius:5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;white-space:nowrap" onclick="this._clicked=true">${actionLabel}</button>`:'');
+  t.style.display='flex';
+  t.style.alignItems='center';
+  t.style.gap='12px';
+  document.body.appendChild(t);
+  if(actionLabel&&actionFn){
+    const btn=t.querySelector('button');
+    btn.addEventListener('click',()=>{actionFn();t.remove();});
+  }
+  if(duration>0)setTimeout(()=>{if(t.parentNode)t.remove();},duration);
+  return t;
+}
 
 // ── Theme colors for PDF export ───────────────────────────
 const PDF_THEMES={
@@ -469,6 +526,11 @@ function exportData(){
   a.click();URL.revokeObjectURL(a.href);
 }
 function doImport(){
+  const importBtn=document.getElementById('import-confirm-btn');
+  const origText=importBtn.textContent;
+  importBtn.textContent='Importing…';
+  importBtn.disabled=true;
+  
   try{
     const d=JSON.parse(document.getElementById('import-ta').value.trim());
     if(!d||typeof d!=='object')throw new Error('Invalid data structure');
@@ -480,9 +542,14 @@ function doImport(){
     save();closeModal('import-modal');document.getElementById('import-ta').value='';init();
     console.log('Data imported successfully');
   }catch(e){
-    alert('Invalid JSON — '+e.message+'. Please check the file and try again.');
+    importBtn.textContent=origText;
+    importBtn.disabled=false;
+    showToast('Invalid JSON — '+e.message+'. Please check the file and try again.','error',null,null,6000);
     console.error('Import failed',e);
+    return;
   }
+  importBtn.textContent=origText;
+  importBtn.disabled=false;
 }
 
 // ── Week helpers ──────────────────────────────────────────
@@ -508,22 +575,59 @@ function getOrCreate(k){
 // ── Carry over ────────────────────────────────────────────
 function checkCarry(){
   const bar=document.getElementById('carry-bar');
-  const prev=Object.keys(weeks).filter(k=>k<currentKey);
-  let n=0;prev.forEach(k=>{const w=weeks[k];n+=w.doing.length+w.planned.length+w.blocked.length;});
-  if(n>0){bar.style.display='flex';document.getElementById('carry-msg').textContent=`${n} incomplete task${n>1?'s':''} from a previous week.`;}
+  const prev=Object.keys(weeks).filter(k=>k<currentKey).sort();
+  let n=0;const weekCounts={};prev.forEach(k=>{const w=weeks[k];const cnt=w.doing.length+w.planned.length+w.blocked.length;if(cnt>0){n+=cnt;weekCounts[k]=cnt;}});
+  if(n>0){
+    bar.style.display='flex';
+    const prevWeeks=Object.keys(weekCounts).length;
+    const sourceMsg=prevWeeks===1?'from '+getWeekLabelFromKey(Object.keys(weekCounts)[0]):'from '+prevWeeks+' previous week'+(prevWeeks>1?'s':'');
+    document.getElementById('carry-msg').textContent=`${n} incomplete task${n>1?'s':''} ${sourceMsg}.`;
+  }
   else bar.style.display='none';
 }
-function carryOver(){
-  const prev=Object.keys(weeks).filter(k=>k<currentKey).sort();
-  const cur=getOrCreate(currentKey);
-  prev.forEach(k=>{const w=weeks[k];COLS.forEach(col=>{w[col].forEach(it=>cur[col].push({text:it.text,note:it.note||'',carried:true,ongoing:it.ongoing||false}));w[col]=[];});});
-  save();document.getElementById('carry-bar').style.display='none';render();
+function carryOver() {
+  const prev = Object.keys(weeks).filter(k => k < currentKey).sort();
+  const cur = getOrCreate(currentKey);
+  let carriedCount = 0;
+
+  prev.forEach(k => {
+    const w = weeks[k];
+    COLS.forEach(col => {
+      w[col].forEach(it => {
+        if (!it.ongoing) {  // only non-ongoing get manual carry
+          cur[col].unshift({ ...it, carried: true });  // ← unshift = add to top
+          carriedCount++;
+        }
+      });
+      w[col] = [];
+    });
+  });
+
+  try {
+    save();
+  } catch (e) {
+    console.error('Failed to save carry-over', e);
+    showToast('⚠ Failed to save — storage full or inaccessible. Tasks carried but not persisted.','error','Reload',()=>location.reload(),0);
+    return;
+  }
+
+  document.getElementById('carry-bar').style.display = 'none';
+  render();
+  if(carriedCount>0){
+    const prevWeeks=Object.keys(weeks).filter(k=>k<currentKey&&Object.keys(weeks).includes(k)).length;
+    showToast(`Carried ${carriedCount} task${carriedCount>1?'s':''} from ${prevWeeks} previous week${prevWeeks>1?'s':''}.`,'success');
+  }
 }
+// autoCarryOngoing — called whenever the user navigates forward a week.
+// Copies tasks marked as ongoing from the previous week (fk) into the new week (tk),
+// tagging them as carried:true so the UI shows the "carried" badge.
+// Checks across all three active columns to avoid duplicating a task that was
+// manually added to the new week already (matches on text + ongoing flag).
 function autoCarryOngoing(fk,tk){
   const from=weeks[fk];if(!from)return;
   const to=getOrCreate(tk);
   COLS.forEach(col=>from[col].filter(it=>it.ongoing).forEach(it=>{
-    if(!to[col].some(x=>x.text===it.text&&x.ongoing))
+    if(!COLS.some(c=>to[c].some(x=>x.text===it.text&&x.ongoing)))
       to[col].push({text:it.text,note:it.note||'',carried:true,ongoing:true});
   }));
 }
@@ -538,10 +642,48 @@ function changeWeek(dir){
 // ── Item actions ──────────────────────────────────────────
 function addItem(col){
   const inp=document.getElementById('in-'+col),v=inp.value.trim();if(!v)return;
-  getOrCreate(currentKey)[col].push({text:v,note:'',carried:false,ongoing:false});
+  getOrCreate(currentKey)[col].push({text:v,note:'',carried:false,ongoing:false,progress:null});
   inp.value='';save();render();
 }
-function removeItem(col,i){getOrCreate(currentKey)[col].splice(i,1);delete editing[col+i];save();render();}
+function setProgress(col,i,val,commit=false){
+  const trimmed=val.trim();
+  const n=parseInt(trimmed,10);
+  const it=getOrCreate(currentKey)[col][i];
+  if(trimmed===''||isNaN(n)){
+    it.progress=null;
+  }else{
+    it.progress=Math.min(100,Math.max(0,n));
+  }
+  save();
+  // Update bar in-place to avoid re-render destroying the focused input
+  const k=col+i;
+  const wrap=document.getElementById('prog-wrap-'+k);
+  const fill=document.getElementById('prog-fill-'+k);
+  const label=document.getElementById('prog-label-'+k);
+  if(it.progress===null){
+    if(wrap)wrap.style.display='none';
+  }else{
+    const pct=it.progress;
+    const color=pct===100?'var(--green)':pct>=50?'var(--blue)':'var(--amber)';
+    if(wrap)wrap.style.display='flex';
+    if(fill){fill.style.width=pct+'%';fill.style.background=color;}
+    if(label){label.textContent=pct+'%';label.style.color=color;}
+    // Only auto-move to completed when the user finishes typing (blur or Enter)
+    if(commit&&pct===100){
+      markDone(col,i);
+      return;
+    }
+  }
+  updateSummary(getOrCreate(currentKey));
+}
+function removeItem(col,i){
+  const w=getOrCreate(currentKey);
+  const removed=w[col].splice(i,1)[0];
+  delete editing[col+i];save();render();
+  showToast('Task deleted.','warning','Undo',()=>{
+    getOrCreate(currentKey)[col].splice(i,0,removed);save();render();
+  });
+}
 function moveItem(fc,i,tc){
   if(fc===tc)return;const w=getOrCreate(currentKey);w[tc].push(w[fc].splice(i,1)[0]);save();render();
 }
@@ -556,8 +698,38 @@ function restoreItem(sec,i){
   const col=it.completedFrom||it.cancelledFrom||'doing';
   w[col].push({text:it.text,note:it.note||'',carried:it.carried||false,ongoing:false});save();render();
 }
-function removeResolved(sec,i){getOrCreate(currentKey)[sec].splice(i,1);save();render();}
-function clearSec(sec){if(!confirm(`Remove all ${sec} tasks from this week?`))return;getOrCreate(currentKey)[sec]=[];save();render();}
+function removeResolved(sec,i){
+  const w=getOrCreate(currentKey);
+  const removed=w[sec].splice(i,1)[0];
+  save();render();
+  showToast('Task deleted.','warning','Undo',()=>{
+    getOrCreate(currentKey)[sec].splice(i,0,removed);save();render();
+  });
+}
+let lastCleared=null;
+
+function clearSec(sec){
+  const w=getOrCreate(currentKey);
+  if(w[sec].length===0)return;
+  lastCleared={section:sec,items:[...w[sec]]};
+  w[sec]=[];save();render();
+  showToast(`Cleared all ${sec} tasks.`,'warning','Undo',()=>{
+    if(!lastCleared)return;
+    getOrCreate(currentKey)[lastCleared.section]=lastCleared.items;
+    lastCleared=null;
+    save();render();
+    showToast('Undo successful — tasks restored.','success',null,null,3000);
+  },5000);
+  setTimeout(()=>lastCleared=null,10000);
+}
+
+function undoClear(){
+  if(!lastCleared)return;
+  const w=getOrCreate(currentKey);
+  w[lastCleared.section]=lastCleared.items;
+  save();render();lastCleared=null;
+  showToast('Undo successful — tasks restored.','success',null,null,3000);
+}
 function toggleOngoing(col,i){const it=getOrCreate(currentKey)[col][i];it.ongoing=!it.ongoing;save();render();}
 function toggleNote(col,i){
   const k=col+i;editing[k]=!editing[k];render();
@@ -638,17 +810,24 @@ function insertStrike(id){
 let datePickerState={taId:null,curDate:new Date(),x:0,y:0};
 function toggleDatePicker(taId){
   const picker=document.getElementById('dp-'+taId);
-  if(picker.classList.contains('open')){picker.classList.remove('open');datePickerState.taId=null;}else{
+  if(picker.classList.contains('open')){
+    picker.classList.remove('open');
+    datePickerState.taId=null;
+  }else{
     document.querySelectorAll('.date-picker.open').forEach(p=>p.classList.remove('open'));
     datePickerState.taId=taId;
     datePickerState.curDate=new Date();
     renderDatePicker(taId);
+    // Check if picker would overflow below viewport and flip it upward if needed
     picker.classList.add('open');
-    // Position picker near the button
-    const btn=event.target;
-    const rect=btn.getBoundingClientRect();
-    picker.style.left=(rect.left+window.scrollX-40)+'px';
-    picker.style.top=(rect.bottom+window.scrollY+4)+'px';
+    const rect=picker.getBoundingClientRect();
+    if(rect.bottom>window.innerHeight-20){
+      picker.style.top='auto';
+      picker.style.bottom='100%';
+    }else{
+      picker.style.top='100%';
+      picker.style.bottom='auto';
+    }
   }
 }
 function renderDatePicker(taId){
@@ -660,24 +839,38 @@ function renderDatePicker(taId){
   let html=`<div class="dp-header">
     <div class="dp-title" style="flex:1">${monthName} ${year}</div>
     <div class="dp-nav">
-      <button class="dp-btn" onclick="changeDateMonth(-1,'${taId}')">◀</button>
-      <button class="dp-btn" onclick="changeDateMonth(1,'${taId}')">▶</button>
+      <button class="dp-btn" aria-label="Previous month" onclick="changeDateMonth(-1,'${taId}')">◀</button>
+      <button class="dp-btn" aria-label="Next month" onclick="changeDateMonth(1,'${taId}')">▶</button>
     </div>
   </div>
-  <div class="dp-calendar">`;
-  days.forEach(d=>html+=`<div class="dp-day-header">${d}</div>`);
+  <div class="dp-calendar" role="grid" aria-label="Calendar">`;
+  days.forEach(d=>html+=`<div class="dp-day-header" role="columnheader" aria-label="${d}">${d}</div>`);
   const startDay=first.getDay();
   for(let i=startDay-1;i>=0;i--){
-    const d=new Date(year,month,-(i));html+=`<div class="dp-day other-month">${d.getDate()}</div>`;
+    const d=new Date(year,month,-(i));
+    html+=`<div class="dp-day other-month" role="gridcell" aria-disabled="true">${d.getDate()}</div>`;
   }
   for(let i=1;i<=last.getDate();i++){
-    const d=new Date(year,month,i),isToday=d.toISOString().slice(0,10)===new Date().toISOString().slice(0,10);
-    html+=`<div class="dp-day ${isToday?'today':''}" onclick="selectDate('${taId}',${year},${month},${i})">${i}</div>`;
+    const d=new Date(year,month,i);
+    const isToday=d.toISOString().slice(0,10)===new Date().toISOString().slice(0,10);
+    // tabindex="0" makes each day focusable; data attrs used by keyboard handler
+    html+=`<div class="dp-day${isToday?' today':''}" role="gridcell" tabindex="0"
+      data-year="${year}" data-month="${month}" data-day="${i}"
+      data-taid="${taId}"
+      onclick="selectDate('${taId}',${year},${month},${i})"
+      onkeydown="handleDpKeydown(event,'${taId}')"
+      aria-label="${d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}"
+      ${isToday?'aria-current="date"':''}>${i}</div>`;
   }
   const endDays=42-last.getDate()-startDay;
-  for(let i=1;i<=endDays;i++)html+=`<div class="dp-day other-month">${i}</div>`;
+  for(let i=1;i<=endDays;i++)html+=`<div class="dp-day other-month" role="gridcell" aria-disabled="true">${i}</div>`;
   html+=`</div>`;
   picker.innerHTML=html;
+  // After render, focus the today cell or the first selectable day
+  setTimeout(()=>{
+    const focused=picker.querySelector('.dp-day.today')||picker.querySelector('.dp-day:not(.other-month)');
+    if(focused)focused.focus();
+  },0);
 }
 function changeDateMonth(dir,taId){
   datePickerState.curDate.setMonth(datePickerState.curDate.getMonth()+dir);
@@ -686,6 +879,7 @@ function changeDateMonth(dir,taId){
 function selectDate(taId,year,month,day){
   const ta=document.getElementById(taId);if(!ta)return;
   const d=new Date(year,month,day);
+  if(d.getMonth()!==month)return; // invalid day (e.g. Feb 30) → silently ignore
   const dateStr=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getFullYear()).slice(-2);
   const pos=ta.selectionStart,val=ta.value,insert=dateStr;
   ta.value=val.substring(0,pos)+insert+val.substring(pos);
@@ -694,7 +888,45 @@ function selectDate(taId,year,month,day){
   datePickerState.taId=null;
   ta.focus();
 }
-// Close pickers on escape
+// Close pickers on escape, also handle arrow key nav
+function handleDpKeydown(e, taId){
+  const key=e.key;
+  // Enter or Space selects the focused day
+  if(key==='Enter'||key===' '){
+    e.preventDefault();
+    const el=e.currentTarget;
+    selectDate(taId,+el.dataset.year,+el.dataset.month,+el.dataset.day);
+    return;
+  }
+  // Arrow keys move focus between days
+  if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(key))return;
+  e.preventDefault();
+  const picker=document.getElementById('dp-'+taId);
+  const cells=Array.from(picker.querySelectorAll('.dp-day:not(.other-month)'));
+  const idx=cells.indexOf(e.currentTarget);
+  let next=-1;
+  if(key==='ArrowLeft')next=idx-1;
+  else if(key==='ArrowRight')next=idx+1;
+  else if(key==='ArrowUp')next=idx-7;
+  else if(key==='ArrowDown')next=idx+7;
+  // If navigating out of bounds, move to prev/next month
+  if(next<0){
+    changeDateMonth(-1,taId);
+    // Focus last day of new month
+    setTimeout(()=>{
+      const newCells=document.getElementById('dp-'+taId).querySelectorAll('.dp-day:not(.other-month)');
+      if(newCells.length)newCells[newCells.length-1].focus();
+    },0);
+  }else if(next>=cells.length){
+    changeDateMonth(1,taId);
+    setTimeout(()=>{
+      const newCells=document.getElementById('dp-'+taId).querySelectorAll('.dp-day:not(.other-month)');
+      if(newCells.length)newCells[0].focus();
+    },0);
+  }else{
+    cells[next].focus();
+  }
+}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.date-picker.open').forEach(p=>p.classList.remove('open'));datePickerState.taId=null;}});
 
 function renderNoteHtml(raw){
@@ -742,13 +974,33 @@ function renderItem(col,it,i){
       </div>
       <textarea class="note-area" id="${tid}" onkeydown="handleNoteKey(event,'${col}',${i})">${esc(it.note)}</textarea>
       <div class="note-ft">
-        <span class="note-hint">Cmd/Ctrl+Enter to save</span>
-        <button class="note-sv" onclick="saveNote('${col}',${i})">Save note</button>
+        <div class="prog-input-wrap">
+          <label for="prog-${k}">Progress</label>
+          <input class="prog-input" id="prog-${k}" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0–100"
+            value="${it.progress!==null&&it.progress!==undefined?it.progress:''}"
+            oninput="setProgress('${col}',${i},this.value,false)"
+            onblur="setProgress('${col}',${i},this.value,true)"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();event.stopPropagation();this.blur();}"
+            aria-label="Percentage complete" /> %
+        </div>
+        <div class="note-ft-actions">
+          <span class="note-hint">Cmd/Ctrl+Enter to save</span>
+          <button class="note-sv" onclick="saveNote('${col}',${i})">Save note</button>
+        </div>
       </div>
     </div>`;
   }else if(it.note){
     noteHtml=`<div class="note-view">${renderNoteHtml(it.note)}</div>`;
   }
+
+  // Progress bar — always rendered (hidden when no value set) so in-place updates work without re-render
+  const pct=it.progress!==null&&it.progress!==undefined?it.progress:null;
+  const progColor=pct===100?'var(--green)':pct>=50?'var(--blue)':'var(--amber)';
+  const progHtml=`<div class="prog-wrap" id="prog-wrap-${k}" style="${pct===null?'display:none':''}">
+    <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-fill-${k}" style="width:${pct||0}%;background:${progColor}"></div></div>
+    <span class="prog-pct" id="prog-label-${k}" style="color:${progColor}">${pct!==null?pct+'%':''}</span>
+  </div>`;
+
   const tags=(it.carried?`<span class="tag t-car">carried</span>`:'')+( it.ongoing?`<span class="tag t-ong">ongoing</span>`:'');
   const ogs=it.ongoing?'color:var(--purple);':'';
   const mid=`mm-${col}-${i}`;
@@ -767,7 +1019,7 @@ function renderItem(col,it,i){
         <button class="ibt" title="${isEd?'Cancel note':'Add or edit note'}" onclick="toggleNote('${col}',${i})">${isEd?'&#x2715;':(it.note?'&#9998;':'&#43;&#9650;')}</button>
         <button class="ibt del" title="Delete permanently" onclick="removeItem('${col}',${i})">&#x2715;</button>
       </div>
-    </div>${noteHtml}</div>`;
+    </div>${progHtml}${noteHtml}</div>`;
 }
 
 function renderResolved(sec,it,i){
@@ -811,7 +1063,7 @@ function updateSummary(w){
   function sec(lbl,items){
     if(!items.length)return;L.push('',lbl);
     items.forEach(it=>{
-      L.push(`  • ${it.text}`+(it.ongoing?' [ongoing]':'')+(it.carried?' [carried]':''));
+      L.push(`  • ${it.text}`+(it.ongoing?' [ongoing]':'')+(it.carried?' [carried]':'')+(it.progress!==null&&it.progress!==undefined?` — ${it.progress}% complete`:''));
       if(it.note)noteToUpdateLines(it.note).forEach(l=>L.push(l));
     });
   }
@@ -871,7 +1123,7 @@ function generatePdf(){
   }else{
     keys=Array.from(document.querySelectorAll('#pdf-week-picker input[type=checkbox]:checked')).map(c=>c.value).sort();
   }
-  if(keys.length===0){alert('No weeks selected or no data found.');return;}
+  if(keys.length===0){showToast('No weeks selected or no data found.','warning');return;}
   const theme=document.querySelector('input[name="pdf-theme"]:checked').value;
   closeModal('pdf-modal');
   const html=buildPdfHtml(keys,theme);
@@ -881,6 +1133,14 @@ function generatePdf(){
   win.focus();
   setTimeout(()=>{win.print();},600);
 }
+// buildPdfHtml — generates a self-contained HTML document for printing/saving as PDF.
+// Opens in a new tab; the browser's native print dialog handles PDF conversion.
+// Keys is an array of ISO week-start dates (YYYY-MM-DD) to include.
+// Theme is 'light' or 'dark' — colours are defined in PDF_THEMES and applied inline
+// since external stylesheets are unreliable in print contexts.
+// The @media print block sets -webkit-print-color-adjust:exact so browsers don't
+// strip background colours when saving to PDF (user still needs "Background graphics"
+// ticked in the Chrome print dialog for dark mode to render correctly).
 function buildPdfHtml(keys,theme){
   const colors=PDF_THEMES[theme]==='light'?PDF_THEMES.light:PDF_THEMES.dark;
   const {BG,TEXT,TEXT2,TEXT3,DIVIDER,TITLE_LINE,GREEN,GREEN_BG,BLUE,BLUE_BG,RED,RED_BG,AMBER,AMBER_BG,GREY,GREY_BG,PURPLE,PURPLE_BG,ITEM_BORDER}=colors;
@@ -909,8 +1169,17 @@ function buildPdfHtml(keys,theme){
     if(!items.length)return'';
     const rows=items.map(it=>{
       const flags=(showFlags&&it.ongoing?badge('ongoing',PURPLE,PURPLE_BG):'')+(it.carried?badge('carried',BLUE,BLUE_BG):'');
+      const pct=it.progress!==null&&it.progress!==undefined?it.progress:null;
+      const pColor=pct===100?GREEN:pct>=50?BLUE:AMBER;
+      const pBar=pct!==null?`<div style="margin-top:5px;display:flex;align-items:center;gap:8px">
+        <div style="flex:1;height:4px;background:${ITEM_BORDER};border-radius:2px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${pColor};border-radius:2px"></div>
+        </div>
+        <span style="font-size:10px;font-weight:500;color:${pColor};min-width:26px;text-align:right">${pct}%</span>
+      </div>`:'';
       return`<div style="margin-bottom:6px;padding:7px 10px;background:${bg};border-radius:6px;border-left:3px solid ${color};border:.5px solid ${ITEM_BORDER};border-left:3px solid ${color}">
         <div style="font-size:12px;font-weight:500;color:${TEXT}">${esc(it.text)}${flags}</div>
+        ${pBar}
         ${noteHtml(it.note||'')}
       </div>`;
     }).join('');
@@ -932,7 +1201,7 @@ function buildPdfHtml(keys,theme){
       L.push({type:'heading',text:lbl});
       items.forEach(it=>{
         const flags=(it.ongoing?' [ongoing]':'')+(it.carried?' [carried]':'');
-        L.push({type:'item',text:it.text+flags,note:it.note||'',col:lbl});
+        L.push({type:'item',text:it.text+flags,note:it.note||'',col:lbl,progress:it.progress??null});
       });
     }
     sec('IN PROGRESS',w.doing);
@@ -957,8 +1226,16 @@ function buildPdfHtml(keys,theme){
         return`<div style="font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:${colColor[line.text]};margin:14px 0 6px;padding-bottom:4px;border-bottom:1.5px solid ${colColor[line.text]}">${line.text}</div>`;
       }
       const noteLines=line.note?noteHtml(line.note):'';
+      const pct=line.progress!==null&&line.progress!==undefined?line.progress:null;
+      const pBar=pct!==null?`<div style="margin-top:4px;display:flex;align-items:center;gap:8px">
+        <div style="flex:1;height:4px;background:${ITEM_BORDER};border-radius:2px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${colColor[currentCol]};border-radius:2px"></div>
+        </div>
+        <span style="font-size:10px;font-weight:500;color:${colColor[currentCol]};min-width:26px;text-align:right">${pct}%</span>
+      </div>`:'';
       return`<div style="margin-bottom:6px;padding:7px 10px;background:${colBg[currentCol]};border-radius:6px;border-left:3px solid ${colColor[currentCol]};border:.5px solid ${ITEM_BORDER};border-left:3px solid ${colColor[currentCol]}">
         <div style="font-size:12px;font-weight:500;color:${TEXT}">${esc(line.text)}</div>
+        ${pBar}
         ${noteLines}
       </div>`;
     }).join('');
@@ -1000,6 +1277,44 @@ function buildPdfHtml(keys,theme){
   </div>
   ${weekSections||`<p style="color:${TEXT3};font-style:italic">No data to display.</p>`}
   </body></html>`;
+}
+
+// ── Global search ─────────────────────────────────────────
+function performGlobalSearch(query) {
+  if (!query.trim()) {
+    closeModal('search-modal');
+    return;
+  }
+  const results = [];
+  Object.keys(weeks).forEach(k => {
+    const w = weeks[k];
+    [...w.doing, ...w.planned, ...w.blocked, ...w.done, ...w.cancelled].forEach((it, idx) => {
+      if (it.text.toLowerCase().includes(query.toLowerCase()) ||
+          (it.note && it.note.toLowerCase().includes(query.toLowerCase()))) {
+        results.push({ week: k, item: it, weekLabel: getWeekLabelFromKey(k) });
+      }
+    });
+  });
+
+  const html = results.length === 0
+    ? '<div style="color:var(--text-3);font-style:italic;padding:20px;text-align:center">No matches found.</div>'
+    : results.map(r => `
+      <div style="padding:10px;border-bottom:.5px solid var(--border);">
+        <div style="font-size:12px;color:var(--text-3);margin-bottom:4px">${r.weekLabel}</div>
+        <div style="font-weight:500">${esc(r.item.text)}</div>
+        ${r.item.note ? `<div style="font-size:12px;color:var(--text-2);margin-top:6px">${esc(renderNoteHtml(r.item.note).slice(0,200))}${r.item.note.length>200?'…':''}</div>` : ''}
+      </div>
+    `).join('');
+
+  document.getElementById('search-results').innerHTML = html;
+  openModal('search-modal');
+}
+
+function getWeekLabelFromKey(k) {  // already exists, but just in case
+  const mon = new Date(k + 'T00:00:00');
+  const fri = new Date(mon); fri.setDate(mon.getDate() + 4);
+  const fmt = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return `Week of ${fmt(mon)} – ${fmt(fri)}`;
 }
 
 // Run once everything is defined
