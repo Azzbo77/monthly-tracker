@@ -332,7 +332,6 @@
   </div>
 </div>
 
-<!-- How to use -->
 <div class="modal-bg" id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
   <div class="modal">
     <div class="modal-title" id="help-modal-title">How to use the weekly tracker</div>
@@ -351,39 +350,55 @@
       <div class="h-grid">
         <span class="h-ic">&#10003;</span><span class="h-ds">Mark as completed — moves to the Completed section.</span>
         <span class="h-ic">&#10007;</span><span class="h-ds">Mark as cancelled — for work dropped or outside your control.</span>
-        <span class="h-ic">&#8594;</span><span class="h-ds">Move to a different column — e.g. move a planned task to Blocked, or a blocked task back to In progress.</span>
-        <span class="h-ic">&#9671;</span><span class="h-ds">Mark as ongoing — automatically carries over to the next week. Turns solid (&#9670;) when active. Use for long-running work spanning weeks or months.</span>
-        <span class="h-ic">+&#9650;</span><span class="h-ds">Add or edit a note. Notes support bullet points, strikethrough formatting, and a percentage complete field. The progress bar appears on the task card and pulls through to the manager update and PDF export.</span>
-        <span class="h-ic">&#8617;</span><span class="h-ds">Restore a completed or cancelled task back to its original column.</span>
-        <span class="h-ic">&#x2715;</span><span class="h-ds">Permanently delete a task. This cannot be undone.</span>
+        <span class="h-ic">&#8594;</span><span class="h-ds">Move to a different column — e.g. move a planned task to Blocked, or a blocked task back to In progress once the issue is resolved.</span>
+        <span class="h-ic">&#9671;</span><span class="h-ds">Mark as ongoing — the task automatically carries over to the next week without any manual action. The diamond turns solid (&#9670;) when active. Use this for long-running work that spans several weeks or months.</span>
+        <span class="h-ic">+&#9650;</span><span class="h-ds">Add or edit a note. Notes support bullet points, strikethrough, date insertion, and a progress percentage.</span>
+        <span class="h-ic">&#8617;</span><span class="h-ds">Restore a completed or cancelled task back to its original column if you marked it in error.</span>
+        <span class="h-ic">&#x2715;</span><span class="h-ds">Delete a task permanently. A toast notification appears with an Undo option for 10 seconds.</span>
       </div>
     </div>
     <div class="h-sec">
       <div class="h-hd">Notes and formatting</div>
-      <p class="h-p">Click +▲ on any task to open the note editor. The toolbar provides two formatting options:</p>
+      <p class="h-p">Click +▲ on any task to open the note editor. The toolbar provides four formatting options:</p>
       <div class="h-grid">
-        <span class="h-ic">• List</span><span class="h-ds">Inserts a bullet point at the cursor. Each bulleted line renders as a list item when saved.</span>
-        <span class="h-ic" style="text-decoration:line-through">S</span><span class="h-ds">Wraps selected text in ~~ for strikethrough. Carries through to the copied manager update. Click again to remove.</span>
-        <span class="h-ic">📅</span><span class="h-ds">Insert a date using the calendar picker. Dates appear in DD/MM/YY format (e.g., 14/03/26).</span>
+        <span class="h-ic">• List</span><span class="h-ds">Inserts a bullet point at the cursor. Press Enter to continue the list on the next line. Press Enter on an empty bullet to end the list.</span>
+        <span class="h-ic" style="text-decoration:line-through">S</span><span class="h-ds">Wraps selected text in ~~ for strikethrough. Carries through to the copied manager update as [done]. Click again on struck text to remove it.</span>
+        <span class="h-ic">📅</span><span class="h-ds">Opens a calendar picker to insert a date. Dates are inserted in DD/MM/YY format (e.g. 14/03/26). Use arrow keys to navigate the calendar or press Enter to select a day.</span>
+        <span class="h-ic">Progress</span><span class="h-ds">Type a number between 0 and 100 in the Progress field to set a percentage. A colour-coded bar appears on the task card and the figure carries through to the manager update and PDF export. Setting 100% and confirming automatically marks the task as completed.</span>
       </div>
-      <p class="h-p" style="margin-top:8px">Press <strong>Cmd+Enter</strong> (Mac) or <strong>Ctrl+Enter</strong> (Windows) to save a note quickly.</p>
+      <p class="h-p" style="margin-top:8px">Press <strong>Cmd+Enter</strong> (Mac) or <strong>Ctrl+Enter</strong> (Windows) to save a note quickly without clicking the Save button.</p>
     </div>
     <div class="h-sec">
       <div class="h-hd">Tags</div>
-      <div class="h-tr"><span class="tag t-car">carried</span><span class="h-ds" style="font-size:12px">Task was carried over from a previous week.</span></div>
-      <div class="h-tr" style="margin-top:6px"><span class="tag t-ong">ongoing</span><span class="h-ds" style="font-size:12px">Carries over automatically each week until completed or cancelled.</span></div>
+      <p class="h-p">Tags appear automatically on tasks to show their history at a glance.</p>
+      <div class="h-tr"><span class="tag t-car">carried</span><span class="h-ds" style="font-size:12px">This task was carried over from a previous week.</span></div>
+      <div class="h-tr" style="margin-top:6px"><span class="tag t-ong">ongoing</span><span class="h-ds" style="font-size:12px">This task carries over automatically each week until marked completed or cancelled.</span></div>
     </div>
     <div class="h-sec">
       <div class="h-hd">Navigating weeks</div>
-      <p class="h-p">Use the arrows at the top to move between weeks. Each week is stored separately so you can look back at any time. A blue banner appears if you have incomplete tasks from a previous week, offering to carry them all over in one click.</p>
+      <p class="h-p">Use the arrows at the top to move between weeks. Each week's tasks are stored separately so you can look back at any time.</p>
+      <p class="h-p">If you have incomplete tasks from a previous week, a blue banner appears offering to carry them all over to the current week in one click. Tasks marked as ongoing carry over automatically whenever you navigate forward — no manual action needed.</p>
+    </div>
+    <div class="h-sec">
+      <div class="h-hd">Search</div>
+      <p class="h-p">Use the search bar in the top right to search across all tasks and notes from every week. Results show the week they belong to and a preview of any matching note content.</p>
     </div>
     <div class="h-sec">
       <div class="h-hd">Manager update</div>
-      <p class="h-p">The update preview builds automatically. Click <strong>Copy update</strong> to copy formatted text to your clipboard, ready to paste into an email, Teams, or Slack. Strikethrough in notes is preserved using ~~ markers in the plain text copy.</p>
+      <p class="h-p">The manager update preview at the bottom of the page builds automatically as you add tasks. Click <strong>Copy update</strong> to copy the formatted text to your clipboard, ready to paste into an email, Teams message, or Slack. Progress percentages and note content are included in the copied text.</p>
+    </div>
+    <div class="h-sec">
+      <div class="h-hd">Exporting as PDF</div>
+      <p class="h-p">Click <strong>Export PDF</strong> to generate a formatted report. You can export the current week only, all weeks with data, or choose specific weeks. A light or dark theme can be selected before generating. The PDF opens in a new tab — use your browser's print dialogue to save it as a file.</p>
+    </div>
+    <div class="h-sec">
+      <div class="h-hd">Clearing completed and cancelled tasks</div>
+      <p class="h-p">Click <strong>Clear all</strong> on the Completed or Cancelled sections to remove all tasks from that section for the current week. A toast notification appears with an Undo option for 10 seconds in case you clear something by mistake.</p>
     </div>
     <div class="h-sec">
       <div class="h-hd">Saving your data</div>
-      <p class="h-p">Data saves automatically to your browser's local storage on every change. Use <strong>Export JSON</strong> to download a backup at any time, and <strong>Import JSON</strong> to restore it on any device.</p>
+      <p class="h-p">Data saves automatically to your browser's local storage every time you make a change. As long as you use the same browser on the same device, your tasks will be there when you return.</p>
+      <p class="h-p">Use <strong>Export JSON</strong> to download a full backup of all your data at any time. Use <strong>Import JSON</strong> to restore from a backup or move your data to a different device.</p>
     </div>
     <div class="modal-acts">
       <button class="btn btn-p" id="help-close-btn">Got it</button>
