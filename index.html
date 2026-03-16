@@ -84,6 +84,10 @@
   .i-dn{border-color:var(--grey);opacity:.6}.i-ca{border-color:var(--amber);opacity:.65}
   .item-top{display:flex;align-items:flex-start;gap:6px}
   .item-txt{font-size:13px;font-weight:500;color:var(--text);flex:1;line-height:1.45;word-break:break-word}
+  .item-txt:hover{cursor:pointer;text-decoration:underline;opacity:.8}
+  .item-txt.editable{cursor:text}
+  .item-name-input{flex:1;font-size:13px;font-weight:500;color:var(--text);font-family:'DM Sans',sans-serif;border:.5px solid var(--blue);border-radius:var(--rs);padding:3px 6px;background:var(--surface);outline:none;line-height:1.45}
+  .item-name-input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(26,95,168,.1)}
   .struck{text-decoration:line-through;color:var(--text-3);font-weight:400}
   .can-txt{text-decoration:line-through;color:var(--amber);font-weight:400}
 
@@ -358,6 +362,10 @@
       </div>
     </div>
     <div class="h-sec">
+      <div class="h-hd">Editing task names</div>
+      <p class="h-p">Double-click any task name to edit it inline. Press <strong>Enter</strong> to save your changes or <strong>Escape</strong> to cancel.</p>
+    </div>
+    <div class="h-sec">
       <div class="h-hd">Notes and formatting</div>
       <p class="h-p">Click +▲ on any task to open the note editor. The toolbar provides four formatting options:</p>
       <div class="h-grid">
@@ -435,7 +443,7 @@ const weeks={},COLS=['doing','planned','blocked'];
 const COL_LABELS={doing:'In progress',planned:'Planned',blocked:'Blocked'};
 const COL_COLORS={doing:'var(--green)',planned:'var(--blue)',blocked:'var(--red)'};
 const secOpen={done:true,cancelled:true};
-const editing={};
+const editing={},editingName={};
 let currentKey='',weekOffset=0;
 
 // ── Storage keys ──────────────────────────────────────────
@@ -746,6 +754,38 @@ function undoClear(){
   showToast('Undo successful — tasks restored.','success',null,null,3000);
 }
 function toggleOngoing(col,i){const it=getOrCreate(currentKey)[col][i];it.ongoing=!it.ongoing;save();render();}
+function toggleEditName(col,i){
+  const k=col+i;
+  editingName[k]=!editingName[k];
+  render();
+  if(editingName[k]){
+    setTimeout(()=>{
+      const inp=document.getElementById('itxt-'+k);
+      if(inp){
+        inp.focus();
+        inp.setSelectionRange(0,inp.value.length);
+      }
+    },0);
+  }
+}
+function saveTaskName(col,i){
+  const k=col+i,inp=document.getElementById('itxt-'+k);
+  if(inp){
+    const newName=inp.value.trim();
+    if(newName){
+      getOrCreate(currentKey)[col][i].text=newName;
+    }
+  }
+  editingName[k]=false;
+  save();
+  render();
+}
+function handleTaskNameKey(e,col,i){
+  // Enter saves
+  if(e.key==='Enter'){e.preventDefault();saveTaskName(col,i);return;}
+  // Escape cancels
+  if(e.key==='Escape'){e.preventDefault();editingName[col+i]=false;render();return;}
+}
 function toggleNote(col,i){
   const k=col+i;editing[k]=!editing[k];render();
   if(editing[k])setTimeout(()=>{const ta=document.getElementById('nte-'+k);if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}},0);
@@ -972,7 +1012,7 @@ function noteToUpdateLines(raw){
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function renderItem(col,it,i){
-  const k=col+i,isEd=editing[k];
+  const k=col+i,isEd=editing[k],isEdName=editingName[k];
   let noteHtml='';
   if(isEd){
     const tid='nte-'+k;
@@ -1020,9 +1060,12 @@ function renderItem(col,it,i){
   const ogs=it.ongoing?'color:var(--purple);':'';
   const mid=`mm-${col}-${i}`;
   const mopts=COLS.filter(c=>c!==col).map(c=>`<button class="mv-opt" onclick="moveItem('${col}',${i},'${c}');event.stopPropagation()"><span class="mv-dot" style="background:${COL_COLORS[c]}"></span>${COL_LABELS[c]}</button>`).join('');
+  const taskNameHtml=isEdName?
+    `<input type="text" id="itxt-${k}" class="item-name-input" value="${esc(it.text)}" onkeydown="handleTaskNameKey(event,'${col}',${i})" onblur="saveTaskName('${col}',${i})"/>`:
+    `<span class="item-txt editable" ondblclick="toggleEditName('${col}',${i})" title="Double-click to edit">${esc(it.text)}${tags}</span>`;
   return`<div class="item i-${col.slice(0,2)}">
     <div class="item-top">
-      <span class="item-txt">${esc(it.text)}${tags}</span>
+      ${taskNameHtml}
       <div class="ibtns">
         <button class="ibt tick" title="Mark as complete" onclick="markDone('${col}',${i})">&#10003;</button>
         <button class="ibt xbt" title="Mark as cancelled" onclick="markCancelled('${col}',${i})">&#10007;</button>
