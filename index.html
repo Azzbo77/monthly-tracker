@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Weekly Work Tracker</title>
+<title>Monthly Work Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
@@ -50,7 +50,7 @@
   .btn-sm{padding:4px 9px;font-size:12px}
   .btn-ic{padding:6px 9px;line-height:1}
 
-  /* week nav */
+  /* month nav */
   .wk-nav{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
   .wk-lbl{font-size:14px;font-weight:500;min-width:220px}
 
@@ -218,10 +218,10 @@
 <body>
 <div class="app">
   <div class="hd">
-    <div class="hd-title">Weekly tracker</div>
+    <div class="hd-title">Monthly tracker</div>
     <div class="hd-acts">
       <button class="btn btn-sm" onclick="openHelp()" aria-label="Open help and usage guide">How to use</button>
-      <button class="btn btn-sm" onclick="openPdfExport()" aria-label="Export current week as PDF">Export PDF</button>
+      <button class="btn btn-sm" onclick="openPdfExport()" aria-label="Export current month as PDF">Export PDF</button>
       <button class="btn btn-sm" onclick="exportData()" aria-label="Export all data as JSON file">Export JSON</button>
       <button class="btn btn-sm" onclick="openImport()" aria-label="Import previously exported JSON">Import JSON</button>
       <button class="btn btn-ic" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle light/dark theme">&#9788;</button>
@@ -230,14 +230,14 @@
   </div>
 
   <div class="wk-nav">
-    <button class="btn btn-ic" onclick="changeWeek(-1)" aria-label="Go to previous week">&#8592;</button>
+    <button class="btn btn-ic" onclick="changeMonth(-1)" aria-label="Go to previous month">&#8592;</button>
     <span class="wk-lbl" id="wk-lbl"></span>
-    <button class="btn btn-ic" onclick="changeWeek(1)" aria-label="Go to next week">&#8594;</button>
+    <button class="btn btn-ic" onclick="changeMonth(1)" aria-label="Go to next month">&#8594;</button>
   </div>
 
   <div id="carry-bar" style="display:none" class="carry">
     <span id="carry-msg"></span>
-    <button onclick="carryOver()">Carry incomplete tasks to this week</button>
+    <button onclick="carryOver()">Carry incomplete tasks to this month</button>
   </div>
 
   <div class="totals">
@@ -254,12 +254,12 @@
 
   <div class="cols">
     <div class="col">
-      <div class="col-hd"><div class="col-dot c-do"></div><div><div class="col-title">In progress</div><div class="col-sub">What I'm working on this week</div></div></div>
+      <div class="col-hd"><div class="col-dot c-do"></div><div><div class="col-title">In progress</div><div class="col-sub">What I'm working on this month</div></div></div>
       <div class="items" id="list-doing"></div>
       <div class="add-row"><input class="add-in" id="in-doing" placeholder="Add task…" onkeydown="if(event.key==='Enter')addItem('doing')"><button class="add-btn" onclick="addItem('doing')">+</button></div>
     </div>
     <div class="col">
-      <div class="col-hd"><div class="col-dot c-pl"></div><div><div class="col-title">Planned</div><div class="col-sub">Coming up this week</div></div></div>
+      <div class="col-hd"><div class="col-dot c-pl"></div><div><div class="col-title">Planned</div><div class="col-sub">Coming up this month</div></div></div>
       <div class="items" id="list-planned"></div>
       <div class="add-row"><input class="add-in" id="in-planned" placeholder="Add task…" onkeydown="if(event.key==='Enter')addItem('planned')"><button class="add-btn" onclick="addItem('planned')">+</button></div>
     </div>
@@ -273,7 +273,7 @@
   <div class="ls">
     <div class="ls-hd" onclick="toggleSec('done')">
       <div class="col-dot c-dn"></div>
-      <div><div class="col-title">Completed</div><div class="col-sub">Finished this week</div></div>
+      <div><div class="col-title">Completed</div><div class="col-sub">Finished this month</div></div>
       <span class="ls-clr" onclick="event.stopPropagation();clearSec('done')">Clear all</span>
       <span class="ls-tog" id="tog-done">&#9660;</span>
     </div>
@@ -306,17 +306,17 @@
 <div class="modal-bg" id="pdf-modal" role="dialog" aria-modal="true" aria-labelledby="pdf-modal-title">
   <div class="modal" style="width:420px" onclick="event.stopPropagation()">
     <div class="modal-title" id="pdf-modal-title">Export as PDF</div>
-    <div class="modal-sub">Choose which weeks to include and how the report should look.</div>
-    <div style="font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px">Weeks</div>
+    <div class="modal-sub">Choose which months to include and how the report should look.</div>
+    <div style="font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px">Months</div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
       <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-2);cursor:pointer">
-        <input type="radio" name="pdf-range" value="current" checked style="accent-color:var(--blue)"> Current week only
+        <input type="radio" name="pdf-range" value="current" checked style="accent-color:var(--blue)"> Current month only
       </label>
       <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-2);cursor:pointer">
-        <input type="radio" name="pdf-range" value="all" style="accent-color:var(--blue)"> All weeks with data
+        <input type="radio" name="pdf-range" value="all" style="accent-color:var(--blue)"> All months with data
       </label>
       <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-2);cursor:pointer">
-        <input type="radio" name="pdf-range" value="pick" style="accent-color:var(--blue)"> Choose specific weeks
+        <input type="radio" name="pdf-range" value="pick" style="accent-color:var(--blue)"> Choose specific months
       </label>
     </div>
     <div id="pdf-week-picker" style="display:none;margin-bottom:16px;max-height:180px;overflow-y:auto;border:.5px solid var(--border-mid);border-radius:var(--rs);padding:8px;background:var(--surface2);flex-direction:column;gap:6px"></div>
@@ -338,14 +338,14 @@
 
 <div class="modal-bg" id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
   <div class="modal">
-    <div class="modal-title" id="help-modal-title">How to use the weekly tracker</div>
+    <div class="modal-title" id="help-modal-title">How to use the monthly tracker</div>
     <div class="modal-sub">A quick guide to getting the most out of your tracker.</div>
     <div class="h-sec">
       <div class="h-hd">The three columns</div>
-      <p class="h-p">Each working week is organised into three columns. Add tasks to whichever column fits best — you can always move them later.</p>
+      <p class="h-p">Each month is organised into three columns. Add tasks to whichever column fits best — you can always move them later.</p>
       <div class="h-grid">
         <span class="h-ic" style="color:var(--green)">&#9679; In progress</span><span class="h-ds">Tasks you are actively working on right now.</span>
-        <span class="h-ic" style="color:var(--blue)">&#9679; Planned</span><span class="h-ds">Tasks you intend to start this week but haven't yet.</span>
+        <span class="h-ic" style="color:var(--blue)">&#9679; Planned</span><span class="h-ds">Tasks you intend to start this month but haven't yet.</span>
         <span class="h-ic" style="color:var(--red)">&#9679; Blocked</span><span class="h-ds">Tasks you cannot progress because something or someone is in the way. Use notes to explain the blocker.</span>
       </div>
     </div>
@@ -355,7 +355,7 @@
         <span class="h-ic">&#10003;</span><span class="h-ds">Mark as completed — moves to the Completed section.</span>
         <span class="h-ic">&#10007;</span><span class="h-ds">Mark as cancelled — for work dropped or outside your control.</span>
         <span class="h-ic">&#8594;</span><span class="h-ds">Move to a different column — e.g. move a planned task to Blocked, or a blocked task back to In progress once the issue is resolved.</span>
-        <span class="h-ic">&#9671;</span><span class="h-ds">Mark as ongoing — the task automatically carries over to the next week without any manual action. The diamond turns solid (&#9670;) when active. Use this for long-running work that spans several weeks or months.</span>
+        <span class="h-ic">&#9671;</span><span class="h-ds">Mark as ongoing — the task automatically carries over to the next month without any manual action. The diamond turns solid (&#9670;) when active. Use this for long-running work that spans several months or longer.</span>
         <span class="h-ic">+&#9650;</span><span class="h-ds">Add or edit a note. Notes support bullet points, strikethrough, date insertion, and a progress percentage.</span>
         <span class="h-ic">&#8617;</span><span class="h-ds">Restore a completed or cancelled task back to its original column if you marked it in error.</span>
         <span class="h-ic">&#x2715;</span><span class="h-ds">Delete a task permanently. A toast notification appears with an Undo option for 10 seconds.</span>
@@ -379,17 +379,17 @@
     <div class="h-sec">
       <div class="h-hd">Tags</div>
       <p class="h-p">Tags appear automatically on tasks to show their history at a glance.</p>
-      <div class="h-tr"><span class="tag t-car">carried</span><span class="h-ds" style="font-size:12px">This task was carried over from a previous week.</span></div>
-      <div class="h-tr" style="margin-top:6px"><span class="tag t-ong">ongoing</span><span class="h-ds" style="font-size:12px">This task carries over automatically each week until marked completed or cancelled.</span></div>
+      <div class="h-tr"><span class="tag t-car">carried</span><span class="h-ds" style="font-size:12px">This task was carried over from a previous month.</span></div>
+      <div class="h-tr" style="margin-top:6px"><span class="tag t-ong">ongoing</span><span class="h-ds" style="font-size:12px">This task carries over automatically each month until marked completed or cancelled.</span></div>
     </div>
     <div class="h-sec">
-      <div class="h-hd">Navigating weeks</div>
-      <p class="h-p">Use the arrows at the top to move between weeks. Each week's tasks are stored separately so you can look back at any time.</p>
-      <p class="h-p">If you have incomplete tasks from a previous week, a blue banner appears offering to carry them all over to the current week in one click. Tasks marked as ongoing carry over automatically whenever you navigate forward — no manual action needed.</p>
+      <div class="h-hd">Navigating months</div>
+      <p class="h-p">Use the arrows at the top to move between months. Each month's tasks are stored separately so you can look back at any time.</p>
+      <p class="h-p">If you have incomplete tasks from a previous month, a blue banner appears offering to carry them all over to the current month in one click. Tasks marked as ongoing carry over automatically whenever you navigate forward — no manual action needed.</p>
     </div>
     <div class="h-sec">
       <div class="h-hd">Search</div>
-      <p class="h-p">Use the search bar in the top right to search across all tasks and notes from every week. Results show the week they belong to and a preview of any matching note content.</p>
+      <p class="h-p">Use the search bar in the top right to search across all tasks and notes from every month. Results show the month they belong to and a preview of any matching note content.</p>
     </div>
     <div class="h-sec">
       <div class="h-hd">Manager update</div>
@@ -397,11 +397,11 @@
     </div>
     <div class="h-sec">
       <div class="h-hd">Exporting as PDF</div>
-      <p class="h-p">Click <strong>Export PDF</strong> to generate a formatted report. You can export the current week only, all weeks with data, or choose specific weeks. A light or dark theme can be selected before generating. The PDF opens in a new tab — use your browser's print dialogue to save it as a file.</p>
+      <p class="h-p">Click <strong>Export PDF</strong> to generate a formatted report. You can export the current month only, all months with data, or choose specific months. A light or dark theme can be selected before generating. The PDF opens in a new tab — use your browser's print dialogue to save it as a file.</p>
     </div>
     <div class="h-sec">
       <div class="h-hd">Clearing completed and cancelled tasks</div>
-      <p class="h-p">Click <strong>Clear all</strong> on the Completed or Cancelled sections to remove all tasks from that section for the current week. A toast notification appears with an Undo option for 10 seconds in case you clear something by mistake.</p>
+      <p class="h-p">Click <strong>Clear all</strong> on the Completed or Cancelled sections to remove all tasks from that section for the current month. A toast notification appears with an Undo option for 10 seconds in case you clear something by mistake.</p>
     </div>
     <div class="h-sec">
       <div class="h-hd">Saving your data</div>
@@ -545,7 +545,7 @@ function toggleTheme(){
 function exportData(){
   const b=new Blob([JSON.stringify({weeks,weekOffset},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);
-  a.download='weekly-tracker-'+new Date().toISOString().slice(0,10)+'.json';
+  a.download='monthly-tracker-'+new Date().toISOString().slice(0,10)+'.json';
   a.click();URL.revokeObjectURL(a.href);
 }
 function doImport(){
@@ -560,6 +560,31 @@ function doImport(){
     if(d.weeks&&typeof d.weeks==='object'){
       Object.keys(weeks).forEach(k=>delete weeks[k]);
       Object.assign(weeks,d.weeks);
+      
+      // Automatic migration: detect and convert old weekly format to monthly
+      (function migrateWeeklyToMonthly(){
+        const keys=Object.keys(weeks);
+        const isOldFormat=keys.some(k=>/^\d{4}-\d{2}-\d{2}$/.test(k)&&!k.endsWith('-01'));
+        if(!isOldFormat)return;
+        
+        const migrated={};
+        keys.forEach(k=>{
+          if(/^\d{4}-\d{2}-\d{2}$/.test(k)){
+            const monthKey=k.slice(0,7)+'-01';
+            if(!migrated[monthKey])migrated[monthKey]={doing:[],planned:[],blocked:[],done:[],cancelled:[]};
+            const w=weeks[k];
+            Object.keys(migrated[monthKey]).forEach(col=>{
+              if(w[col]&&Array.isArray(w[col]))migrated[monthKey][col].push(...w[col]);
+            });
+          }else{
+            migrated[k]=weeks[k];
+          }
+        });
+        
+        Object.keys(weeks).forEach(k=>delete weeks[k]);
+        Object.assign(weeks,migrated);
+        console.log('Weekly data migrated to monthly format successfully');
+      })();
     }
     if(typeof d.weekOffset==='number')weekOffset=d.weekOffset;
     save();closeModal('import-modal');document.getElementById('import-ta').value='';init();
@@ -575,19 +600,16 @@ function doImport(){
   importBtn.disabled=false;
 }
 
-// ── Week helpers ──────────────────────────────────────────
-function weekKey(off){
-  const now=new Date(),day=now.getDay(),mon=new Date(now);
-  mon.setDate(now.getDate()-(day===0?6:day-1)+off*7);
-  return mon.toISOString().slice(0,10);
+// ── Month helpers ──────────────────────────────────────────
+function monthKey(off){
+  const now=new Date(),mon=new Date(now.getFullYear(),now.getMonth()+off,1);
+  return mon.toISOString().slice(0,7)+'-01';
 }
-function getWeekLabel(off){
-  const now=new Date(),day=now.getDay(),mon=new Date(now);
-  mon.setDate(now.getDate()-(day===0?6:day-1)+off*7);
-  const fri=new Date(mon);fri.setDate(mon.getDate()+4);
-  const fmt=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-  const s=off===0?' (this week)':off===-1?' (last week)':off===1?' (next week)':'';
-  return `Week of ${fmt(mon)} – ${fmt(fri)}${s}`;
+function getMonthLabel(off){
+  const now=new Date(),mon=new Date(now.getFullYear(),now.getMonth()+off,1);
+  const fmt=d=>d.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  const s=off===0?' (this month)':off===-1?' (last month)':off===1?' (next month)':'';
+  return `${fmt(mon)}${s}`;
 }
 function getOrCreate(k){
   if(!weeks[k])weeks[k]={doing:[],planned:[],blocked:[],done:[],cancelled:[]};
@@ -599,11 +621,11 @@ function getOrCreate(k){
 function checkCarry(){
   const bar=document.getElementById('carry-bar');
   const prev=Object.keys(weeks).filter(k=>k<currentKey).sort();
-  let n=0;const weekCounts={};prev.forEach(k=>{const w=weeks[k];const cnt=w.doing.length+w.planned.length+w.blocked.length;if(cnt>0){n+=cnt;weekCounts[k]=cnt;}});
+  let n=0;const monthCounts={};prev.forEach(k=>{const w=weeks[k];const cnt=w.doing.length+w.planned.length+w.blocked.length;if(cnt>0){n+=cnt;monthCounts[k]=cnt;}});
   if(n>0){
     bar.style.display='flex';
-    const prevWeeks=Object.keys(weekCounts).length;
-    const sourceMsg=prevWeeks===1?'from '+getWeekLabelFromKey(Object.keys(weekCounts)[0]):'from '+prevWeeks+' previous week'+(prevWeeks>1?'s':'');
+    const prevMonths=Object.keys(monthCounts).length;
+    const sourceMsg=prevMonths===1?'from '+getMonthLabelFromKey(Object.keys(monthCounts)[0]):'from '+prevMonths+' previous month'+(prevMonths>1?'s':'');
     document.getElementById('carry-msg').textContent=`${n} incomplete task${n>1?'s':''} ${sourceMsg}.`;
   }
   else bar.style.display='none';
@@ -637,8 +659,8 @@ function carryOver() {
   document.getElementById('carry-bar').style.display = 'none';
   render();
   if(carriedCount>0){
-    const prevWeeks=Object.keys(weeks).filter(k=>k<currentKey&&Object.keys(weeks).includes(k)).length;
-    showToast(`Carried ${carriedCount} task${carriedCount>1?'s':''} from ${prevWeeks} previous week${prevWeeks>1?'s':''}.`,'success');
+    const prevMonths=Object.keys(weeks).filter(k=>k<currentKey&&Object.keys(weeks).includes(k)).length;
+    showToast(`Carried ${carriedCount} task${carriedCount>1?'s':''} from ${prevMonths} previous month${prevMonths>1?'s':''}.`,'success');
   }
 }
 // autoCarryOngoing — called whenever the user navigates forward a week.
@@ -654,11 +676,11 @@ function autoCarryOngoing(fk,tk){
       to[col].push({text:it.text,note:it.note||'',carried:true,ongoing:true});
   }));
 }
-function changeWeek(dir){
-  const old=weekKey(weekOffset);weekOffset+=dir;
-  if(dir>0)autoCarryOngoing(old,weekKey(weekOffset));
-  currentKey=weekKey(weekOffset);getOrCreate(currentKey);
-  document.getElementById('wk-lbl').textContent=getWeekLabel(weekOffset);
+function changeMonth(dir){
+  const old=monthKey(weekOffset);weekOffset+=dir;
+  if(dir>0)autoCarryOngoing(old,monthKey(weekOffset));
+  currentKey=monthKey(weekOffset);getOrCreate(currentKey);
+  document.getElementById('wk-lbl').textContent=getMonthLabel(weekOffset);
   save();checkCarry();render();
 }
 
@@ -1116,7 +1138,7 @@ function updateSummary(w){
   const el=document.getElementById('summary');
   if(total===0){el.textContent='Add tasks above to generate your update.';return;}
   const L=[];
-  L.push('Weekly update — '+getWeekLabel(weekOffset),'');
+  L.push('Monthly update — '+getMonthLabel(weekOffset),'');;
   L.push(`Summary: ${w.doing.length} in progress, ${w.planned.length} planned, ${w.blocked.length} blocked, ${w.done.length} completed, ${w.cancelled.length} cancelled`);
   function sec(lbl,items){
     if(!items.length)return;L.push('',lbl);
@@ -1138,8 +1160,8 @@ function copyUpdate(){
 }
 
 function init(){
-  currentKey=weekKey(weekOffset);getOrCreate(currentKey);
-  document.getElementById('wk-lbl').textContent=getWeekLabel(weekOffset);
+  currentKey=monthKey(weekOffset);getOrCreate(currentKey);
+  document.getElementById('wk-lbl').textContent=getMonthLabel(weekOffset);
   checkCarry();render();
 }
 
@@ -1155,21 +1177,20 @@ function onPdfRangeChange(){
   const picker=document.getElementById('pdf-week-picker');
   if(val==='pick'){
     picker.style.display='flex';
-    // Populate with all weeks that have data
+    // Populate with all months that have data
     const keys=Object.keys(weeks).filter(k=>{const w=weeks[k];return w.doing.length+w.planned.length+w.blocked.length+w.done.length+w.cancelled.length>0;}).sort().reverse();
-    picker.innerHTML=keys.length===0?'<span style="font-size:12px;color:var(--text-3);font-style:italic">No weeks with data found.</span>':keys.map(k=>`
+    picker.innerHTML=keys.length===0?'<span style="font-size:12px;color:var(--text-3);font-style:italic">No months with data found.</span>':keys.map(k=>`
       <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-2);cursor:pointer">
-        <input type="checkbox" value="${k}" checked style="accent-color:var(--blue)"> ${getWeekLabelFromKey(k)}
+        <input type="checkbox" value="${k}" checked style="accent-color:var(--blue)"> ${getMonthLabelFromKey(k)}
       </label>`).join('');
   }else{
     picker.style.display='none';
   }
 }
-function getWeekLabelFromKey(k){
+function getMonthLabelFromKey(k){
   const mon=new Date(k+'T00:00:00');
-  const fri=new Date(mon);fri.setDate(mon.getDate()+4);
-  const fmt=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  return `Week of ${fmt(mon)} – ${fmt(fri)}`;
+  const fmt=d=>d.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  return fmt(mon);
 }
 function generatePdf(){
   const range=document.querySelector('input[name="pdf-range"]:checked').value;
@@ -1181,7 +1202,7 @@ function generatePdf(){
   }else{
     keys=Array.from(document.querySelectorAll('#pdf-week-picker input[type=checkbox]:checked')).map(c=>c.value).sort();
   }
-  if(keys.length===0){showToast('No weeks selected or no data found.','warning');return;}
+  if(keys.length===0){showToast('No months selected or no data found.','warning');return;}
   const theme=document.querySelector('input[name="pdf-theme"]:checked').value;
   closeModal('pdf-modal');
   const html=buildPdfHtml(keys,theme);
@@ -1299,7 +1320,7 @@ function buildPdfHtml(keys,theme){
     }).join('');
 
     return`<div style="margin-bottom:28px;page-break-inside:avoid">
-      <div style="font-size:22px;font-weight:600;color:${TEXT};margin-bottom:6px;letter-spacing:-.02em">${getWeekLabelFromKey(k)}</div>
+      <div style="font-size:22px;font-weight:600;color:#000000;margin-bottom:6px;letter-spacing:-.02em">${getMonthLabelFromKey(k)}</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid ${DIVIDER}">
         <span style="font-size:12px;font-weight:500;background:${GREEN_BG};color:${GREEN};border-radius:5px;padding:3px 10px">${w.doing.length} in progress</span>
         <span style="font-size:12px;font-weight:500;background:${BLUE_BG};color:${BLUE};border-radius:5px;padding:3px 10px">${w.planned.length} planned</span>
@@ -1315,7 +1336,7 @@ function buildPdfHtml(keys,theme){
   const generated=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
   return`<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8">
-  <title>Weekly Update</title>
+  <title>Monthly Update</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
@@ -1328,10 +1349,10 @@ function buildPdfHtml(keys,theme){
   </head><body>
   <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid ${TITLE_LINE}">
     <div>
-      <div style="font-size:22px;font-weight:600;letter-spacing:-.02em;color:${TEXT}">Weekly Update</div>
-      <div style="font-size:12px;color:${TEXT2};margin-top:2px">Generated ${generated}</div>
+      <div style="font-size:22px;font-weight:600;letter-spacing:-.02em;color:#000000">Monthly Update</div>
+      <div style="font-size:12px;color:#000000;margin-top:2px">Generated ${generated}</div>
     </div>
-    <div style="text-align:right;font-size:11px;color:${TEXT3};padding-top:4px">${keys.length} week${keys.length>1?'s':''} included</div>
+    <div style="text-align:right;font-size:11px;color:#000000;padding-top:4px">${keys.length} month${keys.length>1?'s':''} included</div>
   </div>
   ${weekSections||`<p style="color:${TEXT3};font-style:italic">No data to display.</p>`}
   </body></html>`;
@@ -1349,7 +1370,7 @@ function performGlobalSearch(query) {
     [...w.doing, ...w.planned, ...w.blocked, ...w.done, ...w.cancelled].forEach((it, idx) => {
       if (it.text.toLowerCase().includes(query.toLowerCase()) ||
           (it.note && it.note.toLowerCase().includes(query.toLowerCase()))) {
-        results.push({ week: k, item: it, weekLabel: getWeekLabelFromKey(k) });
+        results.push({ month: k, item: it, monthLabel: getMonthLabelFromKey(k) });
       }
     });
   });
@@ -1358,7 +1379,7 @@ function performGlobalSearch(query) {
     ? '<div style="color:var(--text-3);font-style:italic;padding:20px;text-align:center">No matches found.</div>'
     : results.map(r => `
       <div style="padding:10px;border-bottom:.5px solid var(--border);">
-        <div style="font-size:12px;color:var(--text-3);margin-bottom:4px">${r.weekLabel}</div>
+        <div style="font-size:12px;color:var(--text-3);margin-bottom:4px">${r.monthLabel}</div>
         <div style="font-weight:500">${esc(r.item.text)}</div>
         ${r.item.note ? `<div style="font-size:12px;color:var(--text-2);margin-top:6px">${esc(renderNoteHtml(r.item.note).slice(0,200))}${r.item.note.length>200?'…':''}</div>` : ''}
       </div>
@@ -1366,13 +1387,6 @@ function performGlobalSearch(query) {
 
   document.getElementById('search-results').innerHTML = html;
   openModal('search-modal');
-}
-
-function getWeekLabelFromKey(k) {  // already exists, but just in case
-  const mon = new Date(k + 'T00:00:00');
-  const fri = new Date(mon); fri.setDate(mon.getDate() + 4);
-  const fmt = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  return `Week of ${fmt(mon)} – ${fmt(fri)}`;
 }
 
 // Run once everything is defined
