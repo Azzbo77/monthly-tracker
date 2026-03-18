@@ -254,7 +254,7 @@
   }
   .p-high { background: var(--red); border-color: var(--red); }
   .p-med  { background: var(--amber); border-color: var(--amber); }
-  .p-low  { background: var(--grey); }
+  .p-low  { background: var(--blue); border-color: var(--blue); }
 
   /* Form & Input styles */
   .form-label { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-2); cursor: pointer; }
