@@ -16,12 +16,12 @@
     const tid = 'nte-' + k;
     noteHtml = `<div class="note-ed">
       <div class="note-tb">
-        <button class="ntb-btn" onclick="insertBullet('${tid}')">â€¢ List</button>
+        <button class="ntb-btn" onclick="insertBullet('${tid}')">&#x2022; List</button>
         <div class="ntb-sep"></div>
         <button class="ntb-btn ntb-strike" onclick="insertStrike('${tid}')">S</button>
         <div class="ntb-sep"></div>
         <div class="date-picker-wrapper">
-          <button class="ntb-btn" onclick="toggleDatePicker('${tid}')" title="Insert date">ðŸ“…</button>
+          <button class="ntb-btn" onclick="toggleDatePicker('${tid}')" title="Insert date">&#x1F4C5;</button>
           <div class="date-picker" id="dp-${tid}"></div>
         </div>
       </div>
@@ -29,7 +29,7 @@
       <div class="note-ft">
         <div class="prog-input-wrap">
           <label for="prog-${k}">Progress</label>
-          <input class="prog-input" id="prog-${k}" type="text" inputmode="numeric" placeholder="0â€“100"
+          <input class="prog-input" id="prog-${k}" type="text" inputmode="numeric" placeholder="0&#x2013;100"
             value="${it.progress !== null && it.progress !== undefined ? it.progress : ''}"
             oninput="setProgress('${col}',${i},this.value,false)"
             onblur="setProgress('${col}',${i},this.value,true)"
@@ -47,7 +47,7 @@
     const hideCompletedBtn = hasStrikethrough ? 
       `<button class="note-hide-btn" title="${it.hideCompleted ? 'Show completed items' : 'Hide completed items'}" 
                onclick="toggleHideCompleted('${col}',${i}); event.stopPropagation();">
-        ðŸ‘
+        &#x1F441;
       </button>` : '';
     noteHtml = `<div class="note-view-wrapper">
       <div class="note-view">${renderNoteHtml(it.note, it.hideCompleted)}</div>
@@ -178,7 +178,7 @@ function updateSummary(w) {
   }
 
   const L = [];
-  L.push(`Monthly update â€” ${getMonthLabel(monthOffset)}`, '');
+  L.push(`Monthly update \u2014 ${getMonthLabel(monthOffset)}`, '');
 
   // Summary line
   L.push(`Summary: ${w.doing.length} in progress, ${w.planned.length} planned, ${w.blocked.length} blocked, ${w.done.length} completed, ${w.cancelled.length} cancelled`);
@@ -196,14 +196,14 @@ function updateSummary(w) {
     L.push(title);
     items.forEach(it => {
       // Main task title
-      let line = ` â€¢ ${it.text}`;
+      let line = ` \u2022 ${it.text}`;
       if (it.priority === 'high') line += ' [High Priority]';
       else if (it.priority === 'low') line += ' [Low Priority]';
 
       if (it.ongoing) line += ' [ongoing]';
       if (it.carried) line += ' [carried]';
-      if (it.completedDate) line += ` â€” Completed: ${it.completedDate}`;
-      else if (it.progress != null) line += ` â€” ${it.progress}% complete`;
+      if (it.completedDate) line += ` \u2014 Completed: ${it.completedDate}`;
+      else if (it.progress != null) line += ` \u2014 ${it.progress}% complete`;
       L.push(line);
 
       // Notes indented under the task (only for active items and cancelled, not completed)
@@ -233,7 +233,7 @@ function copyUpdate() {
     const el = document.getElementById('copy-ok');
     el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), TIMING.COPY_CONFIRMATION_FADE);
-  }).catch(() => showToast('Copy failed â€” please copy the text manually.', 'error', null, null, 4000));
+  }).catch(() => showToast('Copy failed \u2014 please copy the text manually.', 'error', null, null, 4000));
 }
 
 function init() {

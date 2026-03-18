@@ -37,9 +37,9 @@ function performGlobalSearch(query) {
     ? '<div style="color:var(--text-3);font-style:italic;padding:20px;text-align:center">No matches found.</div>'
     : results.map(r => `
       <div style="padding:10px;border-bottom:.5px solid var(--border);">
-        <div style="font-size:12px;color:var(--text-3);margin-bottom:4px">${r.monthLabel} Â· ${STATUS_LABELS[r.col] || r.col}</div>
+        <div style="font-size:12px;color:var(--text-3);margin-bottom:4px">${r.monthLabel} &middot; ${STATUS_LABELS[r.col] || r.col}</div>
         <div style="font-weight:500">${esc(r.item.text)}</div>
-        ${r.item.note ? `<div style="font-size:12px;color:var(--text-2);margin-top:6px">${renderNoteHtml(r.item.note.slice(0,200))}${r.item.note.length>200?'â€¦':''}</div>` : ''}
+        ${r.item.note ? `<div style="font-size:12px;color:var(--text-2);margin-top:6px">${renderNoteHtml(r.item.note.slice(0,200))}${r.item.note.length>200?'&#x2026;':''}</div>` : ''}
       </div>
     `).join('');
 

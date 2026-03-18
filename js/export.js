@@ -19,7 +19,7 @@ function exportData() {
 function doImport() {
   const importBtn = document.getElementById('import-confirm-btn');
   const origText = importBtn.textContent;
-  importBtn.textContent = 'Importingâ€¦';
+  importBtn.textContent = 'Importing\u2026';
   importBtn.disabled = true;
 
   try {
@@ -149,9 +149,9 @@ function buildPdfHtml(keys,theme){
     lines.forEach(line=>{
       const escaped=esc(line);
       const fmt=escaped.replace(/~~(.*?)~~/g,`<s style="color:${TEXT3}">$1</s>`);
-      if(line.startsWith('â€¢ ')||line==='â€¢'){
+      if(line.startsWith('\u2022 ')||line==='\u2022'){
         if(!inList){html+=`<ul style="margin:3px 0 3px 16px;padding:0">`;inList=true;}
-        html+=`<li style="margin:1px 0;font-size:11px;color:${TEXT2}">${fmt.replace(/^â€¢\s*/,'')}</li>`;
+        html+=`<li style="margin:1px 0;font-size:11px;color:${TEXT2}">${fmt.replace(/^\u2022\s*/,'')}</li>`;
       }else{
         if(inList){html+='</ul>';inList=false;}
         if(fmt.trim())html+=`<div style="font-size:11px;color:${TEXT2};line-height:1.5">${fmt}</div>`;

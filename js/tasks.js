@@ -178,7 +178,7 @@ function clearSec(sec) {
     lastCleared[sec] = null;
     save();
     render();
-    showToast('Undo successful â€” tasks restored.', 'success', null, null, 3000);
+    showToast('Undo successful \u2014 tasks restored.', 'success', null, null, 3000);
   }, TIMING.TOAST_DEFAULT_DURATION);
   setTimeout(() => { lastCleared[sec] = null; }, TIMING.TOAST_DEFAULT_DURATION + 2000);
 }

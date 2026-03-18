@@ -6,13 +6,13 @@ function handleNoteKey(e, col, i) {
     const pos = ta.selectionStart, val = ta.value;
     const lineStart = val.lastIndexOf('\n', pos - 1) + 1;
     const lineContent = val.substring(lineStart, pos);
-    if (lineContent.startsWith('â€¢ ')) {
+    if (lineContent.startsWith('\u2022 ')) {
       e.preventDefault();
-      if (lineContent === 'â€¢ ') {
+      if (lineContent === '\u2022 ') {
         ta.value = val.substring(0, lineStart) + val.substring(pos);
         ta.selectionStart = ta.selectionEnd = lineStart;
       } else {
-        const insert = '\nâ€¢ ';
+        const insert = '\n\u2022 ';
         ta.value = val.substring(0, pos) + insert + val.substring(pos);
         ta.selectionStart = ta.selectionEnd = pos + insert.length;
       }
@@ -26,11 +26,11 @@ function insertBullet(id) {
   const ls = val.lastIndexOf('\n', s - 1) + 1;
   const le = val.indexOf('\n', s);
   const line = val.substring(ls, le === -1 ? val.length : le);
-  if (line.startsWith('â€¢ ')) {
+  if (line.startsWith('\u2022 ')) {
     ta.value = val.substring(0, ls) + line.substring(2) + val.substring(ls + line.length);
     ta.selectionStart = ta.selectionEnd = Math.max(ls, s - 2);
   } else {
-    ta.value = val.substring(0, ls) + 'â€¢ ' + val.substring(ls);
+    ta.value = val.substring(0, ls) + '\u2022 ' + val.substring(ls);
     ta.selectionStart = ta.selectionEnd = s + 2;
   }
   ta.focus();
@@ -93,8 +93,8 @@ function renderDatePicker(taId) {
   let html = `<div class="dp-header">
     <div class="dp-title" style="flex:1">${monthName} ${year}</div>
     <div class="dp-nav">
-      <button class="dp-btn" aria-label="Previous month" onclick="changeDateMonth(-1,'${taId}')">â—€</button>
-      <button class="dp-btn" aria-label="Next month" onclick="changeDateMonth(1,'${taId}')">â–¶</button>
+      <button class="dp-btn" aria-label="Previous month" onclick="changeDateMonth(-1,'${taId}')">&#x25C0;</button>
+      <button class="dp-btn" aria-label="Next month" onclick="changeDateMonth(1,'${taId}')">&#x25B6;</button>
     </div>
   </div>
   <div class="dp-calendar" role="grid" aria-label="Calendar">`;
@@ -200,9 +200,9 @@ function renderNoteHtml(raw, hideCompleted = false) {
     }
     const escaped = esc(line);
     const fmt = escaped.replace(/~~(.*?)~~/g, '<s>$1</s>');
-    if (line.startsWith('â€¢ ') || line === 'â€¢') {
+    if (line.startsWith('\u2022 ') || line === '\u2022') {
       if (!inList) { html += '<ul>'; inList = true; }
-      html += `<li>${fmt.replace(/^â€¢\s*/,'')}</li>`;
+      html += `<li>${fmt.replace(/^\u2022\s*/,'')}</li>`;
     } else {
       if (inList) { html += '</ul>'; inList = false; }
       html += fmt ? `<span>${fmt}</span><br>` : '<br>';
@@ -225,10 +225,10 @@ function noteToUpdateLines(raw) {
     .filter(line => line.length > 0)
     .map(line => {
       // Remove leading bullet if present and replace with dash for notes
-      if (line.startsWith('â€¢ ')) {
+      if (line.startsWith('\u2022 ')) {
         return `- ${line.slice(MARKUP.BULLET_PREFIX_LENGTH)}`;
       }
-      if (line.startsWith('â€¢')) {
+      if (line.startsWith('\u2022')) {
         return `- ${line.slice(1).trim()}`;
       }
       // Remove strikethrough for clean output
