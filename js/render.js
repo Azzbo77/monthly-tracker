@@ -75,7 +75,7 @@
       <!-- Priority dot -->
       <div class="priority-dot ${it.priority === 'high' ? 'p-high' : it.priority === 'med' ? 'p-med' : 'p-low'}"
            onclick="cyclePriority('${col}', ${i}); event.stopPropagation();" 
-           title="${it.priority === 'high' ? 'Priority: High \u2014 click to set Medium' : it.priority === 'low' ? 'Priority: Low \u2014 click to set Medium' : 'Priority: Medium \u2014 click to set High'}"></div>
+           title="${it.priority === 'high' ? 'Priority: High' : it.priority === 'low' ? 'Priority: Low' : 'Priority: Medium'} \\u2014 click to change"></div>
 
       ${taskNameHtml}
       <div class="ibtns">
