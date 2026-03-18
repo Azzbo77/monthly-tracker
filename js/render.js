@@ -62,7 +62,7 @@
       ${esc(it.text)}${tags}
     </span>`;
 
-  return `<div class="item i-${col.slice(DATE.ISO_DATE_START, MARKUP.COL_IDENTIFIER_LENGTH)}" 
+  return `<div class="item i-${col.slice(0, 2)}" 
                ${isEd || isEdName ? '' : 'draggable="true"'}
                data-col="${col}" 
                data-index="${i}"
@@ -140,7 +140,7 @@ function render() {
       e.preventDefault();
       container.classList.add('drag-over');
     };
-    container.ondragleave = () => container.classList.remove('drag-over');
+    container.ondragleave = e => { if (!container.contains(e.relatedTarget)) container.classList.remove('drag-over'); };
     container.ondrop = e => {
       e.preventDefault();
       e.stopPropagation();

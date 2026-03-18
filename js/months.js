@@ -60,13 +60,14 @@ function carryOver() {
   prev.forEach(k => {
     const w = weeks[k];
     COLS.forEach(col => {
-      w[col].forEach(it => {
+      const clonedBatch = w[col].map(it => {
         const cloned = structuredClone(it);
         cloned.carried = true;
         cloned.order = undefined;
-        cur[col].unshift(cloned);
-        carriedCount++;
+        return cloned;
       });
+      cur[col].unshift(...clonedBatch);
+      carriedCount += clonedBatch.length;
       w[col] = [];
     });
   });
