@@ -1,4 +1,4 @@
-// ── Global search ─────────────────────────────────────────────────────────────
+// -- Global search --
 let _searchTimer = null;
 function debouncedSearch(val) {
   clearTimeout(_searchTimer);
@@ -66,7 +66,7 @@ function performGlobalSearch(query) {
   openModal('search-modal');
 }
 
-// ── Confetti ──────────────────────────────────────────────────────────────────
+// -- Confetti --
 /**
  * Launches a short confetti animation on task completion.
  * Respects the prefers-reduced-motion media query and skips if set.

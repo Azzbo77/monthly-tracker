@@ -1,4 +1,4 @@
-// ── Drag and drop ─────────────────────────────────────────────────────────────
+// -- Drag and drop --
 
 function dragStart(e) {
   draggedItem = e.currentTarget;
@@ -62,7 +62,7 @@ function drop(e) {
  * Wires up each active column container as a drop zone.
  * Called after every render() so the containers are always live.
  * Handles the case where a task is dropped onto the empty space in a column
- * (i.e. not onto a specific task item) — appends it to the end of that column.
+ * (i.e. not onto a specific task item) -- appends it to the end of that column.
  * @returns {void}
  */
 function setupColumnDropZones() {
@@ -81,7 +81,7 @@ function setupColumnDropZones() {
     };
 
     const handleDrop = e => {
-      // Only handle cross-column drops — item-level drop stops propagation for reordering
+      // Only handle cross-column drops -- item-level drop stops propagation for reordering
       e.preventDefault();
       colEl.classList.remove('col-drag-over');
       if (!draggedItem) return;

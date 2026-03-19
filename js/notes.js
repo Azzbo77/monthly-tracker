@@ -1,4 +1,4 @@
-﻿// â”€â”€ Note formatting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- Note formatting --
 function handleNoteKey(e, col, i) {
   const ta = e.target;
   if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); saveNote(col, i); return; }
@@ -214,7 +214,7 @@ function renderNoteHtml(raw, hideCompleted = false) {
 
 /**
  * Transforms raw note text into formatted lines for the manager update summary.
- * Converts bullet points (â€¢) to dashes, removes strikethrough, and filters empty lines.
+ * Converts bullet points (€¢) to dashes, removes strikethrough, and filters empty lines.
  * @param {string} raw - Raw note text containing bullet points and strikethrough formatting
  * @returns {Array<string>} Array of formatted text lines ready for summary display
  */

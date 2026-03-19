@@ -1,6 +1,6 @@
-﻿// â”€â”€ Item actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- Item actions --
 /**
- * Sorts tasks in a column by priority level (High â†’ Medium â†’ Low).
+ * Sorts tasks in a column by priority level (High †’ Medium †’ Low).
  * Within each priority tier, maintains the existing manual order.
  * @param {Array<Object>} tasks - Array of task objects from a column
  * @returns {Array<Object>} Sorted tasks array (modifies in place and returns)
@@ -133,7 +133,7 @@ function markDone(col, i) {
   save();
   render();
   launchConfetti();
-  // Offer an optional completion note — delayed so confetti renders first
+  // Offer an optional completion note -- delayed so confetti renders first
   setTimeout(() => {
     showNoteToast('Add a completion note… (optional)', 'var(--green)', val => {
       it.note = it.note ? it.note + '\n\n[Completed] ' + val : '[Completed] ' + val;
@@ -219,6 +219,11 @@ function clearSec(sec) {
 function moveItem(fc, i, tc) {
   if (fc === tc) return;
   const w = getOrCreate(currentKey);
+  // Clear any open editor state for the task being moved so it doesn't
+  // end up applied to the wrong index after the splice/push + render.
+  const k = fc + i;
+  delete editing[k];
+  delete editingName[k];
   w[tc].push(w[fc].splice(i, 1)[0]);
   normalizeOrders(w);
   save();

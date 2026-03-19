@@ -1,4 +1,4 @@
-﻿// â”€â”€ Modal wiring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- Modal wiring --
 function setupModal(modalId, cancelBtnId, confirmHandler) {
   const m = document.getElementById(modalId);
   const c = document.getElementById(cancelBtnId);

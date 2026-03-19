@@ -1,4 +1,4 @@
-﻿function renderItem(col, it, i) {
+function renderItem(col, it, i) {
   const k = col + i;
   const isEd = editing[k];
   const isEdName = editingName[k];

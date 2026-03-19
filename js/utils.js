@@ -75,11 +75,11 @@ function esc(s) {
  * The onSave callback receives the trimmed input value when the user confirms.
  * Pressing Enter in the input confirms; Escape or Skip dismisses without saving.
  * Does NOT auto-dismiss — stays until the user explicitly saves or skips.
- * @param {string} placeholder - Input placeholder text
+ * @param {string} label       - Descriptive label shown above the input (e.g. 'Add a completion note…')
  * @param {string} accentColor - CSS colour used for the left border accent (e.g. 'var(--green)')
  * @param {function} onSave    - Called with the note string if the user saves
  */
-function showNoteToast(placeholder, accentColor, onSave) {
+function showNoteToast(label, accentColor, onSave) {
   clearAllToasts();
 
   const t = document.createElement('div');
@@ -88,9 +88,9 @@ function showNoteToast(placeholder, accentColor, onSave) {
   t.className = 'toast toast-note';
   t.style.cssText = `border-left: 4px solid ${accentColor};`;
 
-  const label = document.createElement('span');
-  label.className = 'toast-note-label';
-  label.textContent = placeholder;
+  const labelEl = document.createElement('span');
+  labelEl.className = 'toast-note-label';
+  labelEl.textContent = label;
 
   const inp = document.createElement('input');
   inp.type = 'text';
@@ -112,7 +112,7 @@ function showNoteToast(placeholder, accentColor, onSave) {
   actionsRow.appendChild(saveBtn);
   actionsRow.appendChild(skipBtn);
 
-  t.appendChild(label);
+  t.appendChild(labelEl);
   t.appendChild(inp);
   t.appendChild(actionsRow);
   document.body.appendChild(t);

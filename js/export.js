@@ -1,4 +1,4 @@
-// â”€â”€ Export / Import â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- Export / Import --
 function exportData() {
   const toExport = {};
   Object.keys(weeks).forEach(k => {
@@ -38,12 +38,14 @@ function doImport() {
       throw new Error('No valid monthly tracker data found. Make sure you are importing a monthly tracker export.');
     }
 
-    // Stage new data before touching existing data — prevents data loss on error
+    // Stage new data before touching existing data -- prevents data loss on error
     const newData = {};
     Object.keys(data).forEach(key => {
       // Normalise key to YYYY-MM-01: accept YYYY-MM-DD, YYYY-MM, or YYYY-MM-01
       const keyMatch = key.match(/^(\d{4})-(\d{2})(?:-\d{2})?$/);
-      if (!keyMatch) throw new Error(`Invalid month key "${key}" in import data. Expected YYYY-MM-DD format.`);
+      if (!keyMatch) throw new Error(`Invalid month key "${key}" in import data. Expected YYYY-MM or YYYY-MM-DD format.`);
+      const month = parseInt(keyMatch[2], 10);
+      if (month < 1 || month > 12) throw new Error(`Invalid month "${keyMatch[2]}" in key "${key}". Month must be 01–12.`);
       const normKey = `${keyMatch[1]}-${keyMatch[2]}-01`;
 
       const src = data[key];
@@ -61,7 +63,7 @@ function doImport() {
     save();
     closeModal('import-modal');
     document.getElementById('import-ta').value = '';
-    init(); // defined in init.js — re-initialises month state and re-renders
+    init(); // defined in init.js -- re-initialises month state and re-renders
     showToast('Data imported successfully.', 'success');
   } catch (e) {
     showToast('Import failed: ' + e.message, 'error');
@@ -75,7 +77,7 @@ function doImport() {
 }
 
 
-// â”€â”€ PDF Export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- PDF Export --
 function openPdfExport() {
   document.querySelector('input[name="pdf-range"][value="current"]').checked = true;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -125,10 +127,10 @@ function generatePdf() {
   win.focus();
   setTimeout(() => { win.print(); }, TIMING.PDF_PRINT_DIALOG_DELAY);
 }
-// buildPdfHtml â€” generates a self-contained HTML document for printing/saving as PDF.
+// buildPdfHtml €” generates a self-contained HTML document for printing/saving as PDF.
 // Opens in a new tab; the browser's native print dialog handles PDF conversion.
 // Keys is an array of ISO week-start dates (YYYY-MM-DD) to include.
-// Theme is 'light' or 'dark' â€” colours are defined in PDF_THEMES and applied inline
+// Theme is 'light' or 'dark' €” colours are defined in PDF_THEMES and applied inline
 // since external stylesheets are unreliable in print contexts.
 // The @media print block sets -webkit-print-color-adjust:exact so browsers don't
 // strip background colours when saving to PDF (user still needs "Background graphics"
@@ -170,7 +172,7 @@ function buildPdfHtml(keys,theme){
     const total=w.doing.length+w.planned.length+w.blocked.length+w.done.length+w.cancelled.length;
     if(total===0)return'';
 
-    // Build summary text lines â€” same logic as the manager update preview
+    // Build summary text lines €” same logic as the manager update preview
     const L=[];
     function sec(lbl,items){
       if(!items.length)return;

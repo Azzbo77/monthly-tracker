@@ -1,4 +1,4 @@
-﻿// â”€â”€ Month helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- Month helpers --
 function monthKey(off) {
   const now = new Date();
   const mon = new Date(now.getFullYear(), now.getMonth() + off, 1);
@@ -25,7 +25,7 @@ function getOrCreate(k) {
   return weeks[k];
 }
 
-// â”€â”€ Carry over â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- Carry over --
 function checkCarry() {
   const bar = document.getElementById('carry-bar');
   const prev = Object.keys(weeks).filter(k => k < currentKey).sort();
