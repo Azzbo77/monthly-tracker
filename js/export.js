@@ -41,9 +41,14 @@ function doImport() {
     // Stage new data before touching existing data — prevents data loss on error
     const newData = {};
     Object.keys(data).forEach(key => {
+      // Normalise key to YYYY-MM-01: accept YYYY-MM-DD, YYYY-MM, or YYYY-MM-01
+      const keyMatch = key.match(/^(\d{4})-(\d{2})(?:-\d{2})?$/);
+      if (!keyMatch) throw new Error(`Invalid month key "${key}" in import data. Expected YYYY-MM-DD format.`);
+      const normKey = `${keyMatch[1]}-${keyMatch[2]}-01`;
+
       const src = data[key];
-      if (!newData[key]) newData[key] = { doing: [], planned: [], blocked: [], done: [], cancelled: [] };
-      const dest = newData[key];
+      if (!newData[normKey]) newData[normKey] = { doing: [], planned: [], blocked: [], done: [], cancelled: [] };
+      const dest = newData[normKey];
       COLS.forEach(col => { if (Array.isArray(src[col])) dest[col].push(...src[col].map(item => structuredClone(item))); });
       if (Array.isArray(src.done)) dest.done.push(...src.done.map(item => structuredClone(item)));
       if (Array.isArray(src.cancelled)) dest.cancelled.push(...src.cancelled.map(item => structuredClone(item)));
