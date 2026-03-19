@@ -1,6 +1,6 @@
-﻿// â”€â”€ Item actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- Item actions --
 /**
- * Sorts tasks in a column by priority level (High â†’ Medium â†’ Low).
+ * Sorts tasks in a column by priority level (High → Medium → Low).
  * Within each priority tier, maintains the existing manual order.
  * @param {Array<Object>} tasks - Array of task objects from a column
  * @returns {Array<Object>} Sorted tasks array (modifies in place and returns)
@@ -20,6 +20,7 @@ function sortColumnByPriority(col) {
   normalizeOrders(w);
   save();
   render();
+  showToast(`${COL_LABELS[col]} sorted by priority.`, 'info', null, null, 2500);
 }
 
 // Assign consistent order values (0, 1, 2...) to all tasks in a month
@@ -125,12 +126,21 @@ function markDone(col, i) {
   const w = getOrCreate(currentKey);
   const it = w[col].splice(i, 1)[0];
   shiftEditingKeys(col, i);
+  if (it.progress !== null && it.progress !== undefined) it.progress = 100;
   it.completedFrom = col;
-  it.completedDate = new Date().toISOString().slice(DATE.ISO_DATE_START, DATE.ISO_DATE_SLICE);
+  it.completedDate = new Date().toISOString().slice(0, DATE.ISO_DATE_SLICE);
   w.done.push(it);
   save();
   render();
   launchConfetti();
+  // Offer an optional completion note -- delayed so confetti renders first
+  setTimeout(() => {
+    showNoteToast('Add a completion note… (optional)', 'var(--green)', val => {
+      it.note = it.note ? it.note + '\n\n[Completed] ' + val : '[Completed] ' + val;
+      save();
+      render();
+    });
+  }, 400);
 }
 
 function markCancelled(col, i) {
@@ -138,9 +148,18 @@ function markCancelled(col, i) {
   const it = w[col].splice(i, 1)[0];
   shiftEditingKeys(col, i);
   it.cancelledFrom = col;
+  it.cancelledDate = new Date().toISOString().slice(0, DATE.ISO_DATE_SLICE);
   w.cancelled.push(it);
   save();
   render();
+  // Offer an optional cancellation reason note
+  setTimeout(() => {
+    showNoteToast('Add a reason for cancelling… (optional)', 'var(--amber)', val => {
+      it.note = it.note ? it.note + '\n\n[Cancelled] ' + val : '[Cancelled] ' + val;
+      save();
+      render();
+    });
+  }, 100);
 }
 
 function restoreItem(sec, i) {
@@ -148,6 +167,22 @@ function restoreItem(sec, i) {
   const it = w[sec].splice(i, 1)[0];
   const col = COLS.includes(it.completedFrom) ? it.completedFrom :
               COLS.includes(it.cancelledFrom) ? it.cancelledFrom : 'doing';
+  // Clear resolution metadata so the task is clean when reactivated
+  delete it.completedFrom;
+  delete it.completedDate;
+  delete it.cancelledFrom;
+  delete it.cancelledDate;
+  // Strip any completion/cancellation note appended by the note toast.
+  // Two cases: note was the entire content (starts with tag),
+  // or it was appended after existing content (preceded by \n\n).
+  if (it.note) {
+    it.note = it.note
+      .replace(/\n\n\[Completed\][^]*$/, '')
+      .replace(/\n\n\[Cancelled\][^]*$/, '')
+      .replace(/^\[Completed\][^]*$/, '')
+      .replace(/^\[Cancelled\][^]*$/, '')
+      .trimEnd();
+  }
   w[col].push(it);
   save();
   render();
@@ -179,6 +214,24 @@ function clearSec(sec) {
     render();
     showToast('Undo successful \u2014 tasks restored.', 'success', null, null, 3000);
   }, TIMING.TOAST_DEFAULT_DURATION);
+}
+
+function moveItem(fc, i, tc) {
+  if (fc === tc) return;
+  const w = getOrCreate(currentKey);
+  // Clear editor state for the moved task and shift indices for tasks below it
+  // in the source column, so no editor ends up applied to the wrong task.
+  shiftEditingKeys(fc, i);
+  w[tc].push(w[fc].splice(i, 1)[0]);
+  normalizeOrders(w);
+  save();
+  render();
+}
+
+function toggleMoveMenu(e, id) {
+  e.stopPropagation();
+  document.querySelectorAll('.mv-menu.open').forEach(m => { if (m.id !== id) m.classList.remove('open'); });
+  document.getElementById(id).classList.toggle('open');
 }
 
 function toggleOngoing(col, i) {

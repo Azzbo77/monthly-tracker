@@ -1,4 +1,4 @@
-﻿// â”€â”€ Note formatting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- Note formatting --
 function handleNoteKey(e, col, i) {
   const ta = e.target;
   if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); saveNote(col, i); return; }
@@ -106,7 +106,7 @@ function renderDatePicker(taId) {
   }
   for (let i = 1; i <= last.getDate(); i++) {
     const d = new Date(year, month, i);
-    const isToday = d.toISOString().slice(DATE.ISO_DATE_START, DATE.ISO_DATE_SLICE) === new Date().toISOString().slice(DATE.ISO_DATE_START, DATE.ISO_DATE_SLICE);
+    const isToday = d.toISOString().slice(0, DATE.ISO_DATE_SLICE) === new Date().toISOString().slice(0, DATE.ISO_DATE_SLICE);
     html += `<div class="dp-day${isToday?' today':''}" role="gridcell" tabindex="0"
       data-year="${year}" data-month="${month}" data-day="${i}"
       data-taid="${taId}"
@@ -135,9 +135,9 @@ function selectDate(taId, year, month, day) {
   const ta = document.getElementById(taId); if (!ta) return;
   const d = new Date(year, month, day);
   if (d.getMonth() !== month) return; // invalid day guard
-  const dateStr = String(d.getDate()).padStart(DATE.PADSTART_LENGTH,'0') + '/' +
-                  String(d.getMonth()+1).padStart(DATE.PADSTART_LENGTH,'0') + '/' +
-                  String(d.getFullYear()).slice(-DATE.YEAR_SLICE_LENGTH);
+  const dateStr = String(d.getDate()).padStart(2,'0') + '/' +
+                  String(d.getMonth()+1).padStart(2,'0') + '/' +
+                  String(d.getFullYear()).slice(-2);
   const pos = ta.selectionStart, val = ta.value;
   ta.value = val.substring(0, pos) + dateStr + val.substring(pos);
   ta.selectionStart = ta.selectionEnd = pos + dateStr.length;
@@ -214,7 +214,7 @@ function renderNoteHtml(raw, hideCompleted = false) {
 
 /**
  * Transforms raw note text into formatted lines for the manager update summary.
- * Converts bullet points (â€¢) to dashes, removes strikethrough, and filters empty lines.
+ * Converts bullet points (•) to dashes, removes strikethrough, and filters empty lines.
  * @param {string} raw - Raw note text containing bullet points and strikethrough formatting
  * @returns {Array<string>} Array of formatted text lines ready for summary display
  */
@@ -224,15 +224,16 @@ function noteToUpdateLines(raw) {
     .map(line => line.trim())
     .filter(line => line.length > 0)
     .map(line => {
+      // Replace strikethrough on all lines first
+      const stripped = line.replace(/~~(.*?)~~/g, '$1 [Done]');
       // Remove leading bullet if present and replace with dash for notes
-      if (line.startsWith('\u2022 ')) {
-        return `- ${line.slice(MARKUP.BULLET_PREFIX_LENGTH)}`;
+      if (stripped.startsWith('\u2022 ')) {
+        return `- ${stripped.slice(2)}`;
       }
-      if (line.startsWith('\u2022')) {
-        return `- ${line.slice(1).trim()}`;
+      if (stripped.startsWith('\u2022')) {
+        return `- ${stripped.slice(1).trim()}`;
       }
-      // Remove strikethrough for clean output
-      return line.replace(/~~(.*?)~~/g, '$1 [Done]');
+      return stripped;
     });
 }
 
@@ -244,3 +245,17 @@ function noteToUpdateLines(raw) {
  * @param {number} i - Zero-based index of the task within its column
  * @returns {string} HTML string ready to insert into the DOM
  */
+
+/**
+ * Extracts only the resolution note added by the completion/cancellation toast.
+ * Returns the text after [Completed] or [Cancelled] if present, otherwise empty string.
+ * Used by the manager update and PDF to show a high-level resolution reason
+ * without exposing the full working notes.
+ * @param {string} note - Raw note content
+ * @returns {string} The resolution note text, or '' if none was saved
+ */
+function extractResolutionNote(note) {
+  if (!note) return '';
+  const match = note.match(/\[Completed\] (.+)$/) || note.match(/\[Cancelled\] (.+)$/);
+  return match ? match[1].trim() : '';
+}

@@ -1,4 +1,4 @@
-﻿function renderItem(col, it, i) {
+function renderItem(col, it, i) {
   const k = col + i;
   const isEd = editing[k];
   const isEdName = editingName[k];
@@ -62,6 +62,13 @@
       ${esc(it.text)}${tags}
     </span>`;
 
+  const mid = `mm-${col}-${i}`;
+  const mopts = COLS.filter(c => c !== col).map(c =>
+    `<button class="mv-opt" onclick="moveItem('${col}',${i},'${c}');event.stopPropagation()">
+      <span class="mv-dot" style="background:${COL_COLORS[c]}"></span>${COL_LABELS[c]}
+    </button>`
+  ).join('');
+
   return `<div class="item i-${col.slice(0, 2)}" 
                ${isEd || isEdName ? '' : 'draggable="true"'}
                data-col="${col}" 
@@ -75,12 +82,16 @@
       <!-- Priority dot -->
       <div class="priority-dot ${it.priority === 'high' ? 'p-high' : it.priority === 'med' ? 'p-med' : 'p-low'}"
            onclick="cyclePriority('${col}', ${i}); event.stopPropagation();" 
-           title="${it.priority === 'high' ? 'Priority: High' : it.priority === 'low' ? 'Priority: Low' : 'Priority: Medium'} \\u2014 click to change"></div>
+           title="${it.priority === 'high' ? 'Priority: High' : it.priority === 'low' ? 'Priority: Low' : 'Priority: Medium'} \u2014 click to change"></div>
 
       ${taskNameHtml}
       <div class="ibtns">
         <button class="ibt tick" title="Mark as complete" onclick="markDone('${col}',${i})">&#10003;</button>
         <button class="ibt xbt" title="Mark as cancelled" onclick="markCancelled('${col}',${i})">&#10007;</button>
+        <div class="mv-wrap">
+          <button class="ibt" title="Move to another column" onclick="toggleMoveMenu(event,'${mid}')">&#8594;</button>
+          <div class="mv-menu" id="${mid}">${mopts}</div>
+        </div>
         <button class="ibt" title="${it.ongoing ? 'Remove ongoing flag' : 'Mark as ongoing'}" 
                 onclick="toggleOngoing('${col}',${i})" style="${it.ongoing ? 'color:var(--purple)' : ''}">
           ${it.ongoing ? '&#9670;' : '&#9671;'}
@@ -104,11 +115,12 @@ function renderResolved(sec, it, i) {
   const tc = isCan ? 'can-txt' : 'struck';
   const ct = isCan ? `<span class="tag t-can">cancelled</span>` : '';
   const completedDateHtml = !isCan && it.completedDate ? `<span class="tag t-date" title="Completed on ${it.completedDate}">${it.completedDate}</span>` : '';
+  const cancelledDateHtml = isCan && it.cancelledDate ? `<span class="tag t-date" title="Cancelled on ${it.cancelledDate}">${it.cancelledDate}</span>` : '';
   const priorityDot = `<div class="priority-dot ${it.priority === 'high' ? 'p-high' : it.priority === 'med' ? 'p-med' : 'p-low'}"></div>`;
   return `<div class="item ${isCan?'i-ca':'i-dn'}">
     <div class="item-top">
       ${priorityDot}
-      <span class="item-txt ${tc}">${esc(it.text)}${tags}${completedDateHtml}${ct}</span>
+      <span class="item-txt ${tc}">${esc(it.text)}${tags}${completedDateHtml}${cancelledDateHtml}${ct}</span>
       <div class="ibtns">
         <button class="ibt" title="Restore to active" onclick="restoreItem('${sec}',${i})" style="font-size:14px">&#8617;</button>
         <button class="ibt del" title="Remove permanently" onclick="removeResolved('${sec}',${i})">&#x2715;</button>
@@ -129,36 +141,7 @@ function render() {
     el.innerHTML = w[sec].length === 0 ? `<div class="empty">No ${sec} tasks</div>` : w[sec].map((it, i) => renderResolved(sec, it, i)).join('');
   });
   updateSummary(w);
-
-  normalizeOrders(getOrCreate(currentKey));
-
-  // Allow dropping on empty active column containers only (not done/cancelled)
-  COLS.forEach(col => {
-    const container = document.getElementById('list-' + col);
-    if (!container) return;
-    container.ondragover = e => {
-      e.preventDefault();
-      container.classList.add('drag-over');
-    };
-    container.ondragleave = e => { if (!container.contains(e.relatedTarget)) container.classList.remove('drag-over'); };
-    container.ondrop = e => {
-      e.preventDefault();
-      e.stopPropagation();
-      container.classList.remove('drag-over');
-      if (!draggedItem) return;
-      const fromCol = draggedItem.dataset.col;
-      if (fromCol === col) return;
-      const w = getOrCreate(currentKey);
-      const idx = parseInt(draggedItem.dataset.index);
-      if (isNaN(idx) || idx < 0 || idx >= w[fromCol].length) return;
-      const [movedTask] = w[fromCol].splice(idx, 1);
-      if (!movedTask) return;
-      w[col].push(movedTask);
-      normalizeOrders(w);
-      save();
-      render();
-    };
-  });
+  setupColumnDropZones();
 }
 
 /**
@@ -194,27 +177,37 @@ function updateSummary(w) {
   function addSection(title, items) {
     if (items.length === 0) return;
     L.push(title);
+    const isResolved = title === 'COMPLETED' || title === 'CANCELLED';
     items.forEach(it => {
-      // Main task title
       let line = ` \u2022 ${it.text}`;
-      if (it.priority === 'high') line += ' [High Priority]';
-      else if (it.priority === 'low') line += ' [Low Priority]';
 
-      if (it.ongoing) line += ' [ongoing]';
-      if (it.carried) line += ' [carried]';
-      if (it.completedDate) line += ` \u2014 Completed: ${it.completedDate}`;
-      else if (it.progress != null) line += ` \u2014 ${it.progress}% complete`;
+      if (!isResolved) {
+        // Active tasks: show priority, flags and progress
+        if (it.priority === 'high') line += ' [High Priority]';
+        else if (it.priority === 'low') line += ' [Low Priority]';
+        if (it.ongoing) line += ' [ongoing]';
+        if (it.carried) line += ' [carried]';
+        if (it.progress != null) line += ` \u2014 ${it.progress}% complete`;
+      } else {
+        // Resolved tasks: date only on the title line
+        if (it.completedDate) line += ` \u2014 Completed: ${it.completedDate}`;
+        else if (it.cancelledDate) line += ` \u2014 Cancelled: ${it.cancelledDate}`;
+      }
       L.push(line);
 
-      // Notes indented under the task (only for active items and cancelled, not completed)
-      if (it.note && title !== 'COMPLETED') {
-        const noteLines = noteToUpdateLines(it.note);
-        noteLines.forEach(noteLine => {
-          L.push(`     ${noteLine}`);   // 5 spaces indentation
-        });
+      if (!isResolved) {
+        // Active tasks: include full note content
+        if (it.note) {
+          noteToUpdateLines(it.note).forEach(noteLine => L.push(`     ${noteLine}`));
+        }
+      } else {
+        // Resolved tasks: only the resolution note from the toast, if one was saved
+        const resNote = extractResolutionNote(it.note);
+        const resLabel = title === 'COMPLETED' ? 'Completion Note' : 'Cancellation Note';
+        if (resNote) L.push(`     ${resLabel}: ${resNote}`);
       }
     });
-    L.push('');   // blank line between sections
+    L.push('');
   }
 
   addSection('IN PROGRESS', w.doing);
@@ -236,23 +229,6 @@ function copyUpdate() {
   }).catch(() => showToast('Copy failed \u2014 please copy the text manually.', 'error', null, null, 4000));
 }
 
-function init() {
-  refresh();
-}
 
-function refresh() {
-  currentKey = monthKey(monthOffset);
-  const w = getOrCreate(currentKey);
-  normalizeOrders(w);
-  document.getElementById('wk-lbl').textContent = getMonthLabel(monthOffset);
-  _syncTodayBtn();
-  ['done', 'cancelled'].forEach(sec => {
-    const body = document.getElementById('body-' + sec);
-    const tog = document.getElementById('tog-' + sec);
-    if (body) body.style.display = secOpen[sec] ? 'block' : 'none';
-    if (tog) tog.innerHTML = secOpen[sec] ? '&#9660;' : '&#9654;';
-  });
-  checkCarry();
-  render();
-}
+
 

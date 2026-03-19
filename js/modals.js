@@ -1,4 +1,4 @@
-﻿// â”€â”€ Modal wiring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- Modal wiring --
 function setupModal(modalId, cancelBtnId, confirmHandler) {
   const m = document.getElementById(modalId);
   const c = document.getElementById(cancelBtnId);
@@ -27,7 +27,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  // Clear search state when the search modal is dismissed
+  if (id === 'search-modal') {
+    const inp = document.getElementById('global-search');
+    if (inp) inp.value = '';
+    const results = document.getElementById('search-results');
+    if (results) results.innerHTML = '';
+  }
+}
 function openHelp() { openModal('help-modal'); }
 function openImport() { openModal('import-modal'); }
 

@@ -69,3 +69,68 @@ function esc(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+/**
+ * Shows a toast with an embedded text input for capturing an optional note.
+ * Used after marking tasks complete or cancelled.
+ * The onSave callback receives the trimmed input value when the user confirms.
+ * Pressing Enter in the input confirms; Escape or Skip dismisses without saving.
+ * Does NOT auto-dismiss — stays until the user explicitly saves or skips.
+ * @param {string} label       - Descriptive label shown above the input (e.g. 'Add a completion note…')
+ * @param {string} accentColor - CSS colour used for the left border accent (e.g. 'var(--green)')
+ * @param {function} onSave    - Called with the note string if the user saves
+ */
+function showNoteToast(label, accentColor, onSave) {
+  clearAllToasts();
+
+  const t = document.createElement('div');
+  t.setAttribute('role', 'dialog');
+  t.setAttribute('aria-label', 'Optional note');
+  t.className = 'toast toast-note';
+  t.style.cssText = `border-left: 4px solid ${accentColor};`;
+
+  const labelEl = document.createElement('span');
+  labelEl.className = 'toast-note-label';
+  labelEl.textContent = label;
+
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.className = 'toast-input';
+  inp.placeholder = 'Type a note…';
+  inp.maxLength = 200;
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'toast-action-btn toast-action-btn--accent';
+  saveBtn.style.cssText = `background:${accentColor};border-color:${accentColor};`;
+  saveBtn.textContent = 'Save';
+
+  const skipBtn = document.createElement('button');
+  skipBtn.className = 'toast-action-btn';
+  skipBtn.textContent = 'Skip';
+
+  const actionsRow = document.createElement('div');
+  actionsRow.className = 'toast-note-actions';
+  actionsRow.appendChild(saveBtn);
+  actionsRow.appendChild(skipBtn);
+
+  t.appendChild(labelEl);
+  t.appendChild(inp);
+  t.appendChild(actionsRow);
+  document.body.appendChild(t);
+
+  setTimeout(() => inp.focus(), 50);
+
+  const confirm = () => {
+    const val = inp.value.trim();
+    t.remove();
+    if (val) onSave(val);
+  };
+
+  const dismiss = () => t.remove();
+
+  saveBtn.addEventListener('click', confirm);
+  skipBtn.addEventListener('click', dismiss);
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); confirm(); }
+    if (e.key === 'Escape') { e.preventDefault(); dismiss(); }
+  });
+}

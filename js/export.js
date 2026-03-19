@@ -1,4 +1,4 @@
-﻿// â”€â”€ Export / Import â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- Export / Import --
 function exportData() {
   const toExport = {};
   Object.keys(weeks).forEach(k => {
@@ -8,7 +8,7 @@ function exportData() {
   const b = new Blob([JSON.stringify({ months: toExport, monthOffset }, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(b);
-  a.download = 'monthly-tracker-' + new Date().toISOString().slice(DATE.ISO_DATE_START, DATE.ISO_DATE_SLICE) + '.json';
+  a.download = 'monthly-tracker-' + new Date().toISOString().slice(0, DATE.ISO_DATE_SLICE) + '.json';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -16,8 +16,7 @@ function exportData() {
 }
 
 /**
- * Imports and processes exported JSON data, replacing current local storage.
- * Handles migration from weekly to monthly format automatically.
+ * Imports and processes exported monthly JSON data, replacing current local storage.
  * Validates data structure and displays appropriate error/success messages.
  * @returns {void}
  */
@@ -32,24 +31,29 @@ function doImport() {
     if (!raw) throw new Error('No data provided');
 
     const d = JSON.parse(raw);
-    const data = d.months || d.weeks || {};
-    const offset = typeof d.monthOffset === 'number' ? d.monthOffset : 
-                   typeof d.weekOffset === 'number' ? d.weekOffset : 0;
+    const data = d.months;
+    const offset = typeof d.monthOffset === 'number' ? d.monthOffset : 0;
 
-    if (Object.keys(data).length === 0) throw new Error('No valid tracker data found');
+    if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+      throw new Error('No valid monthly tracker data found. Make sure you are importing a monthly tracker export.');
+    }
 
-    // Stage new data before touching existing data â€” prevents data loss on error
+    // Stage new data before touching existing data -- prevents data loss on error
     const newData = {};
     Object.keys(data).forEach(key => {
-      let mk = key;
-      if (/^\d{4}-\d{2}-\d{2}$/.test(key)) {
-        mk = key.slice(DATE.ISO_DATE_START, DATE.ISO_MONTH_SLICE) + '-01';
-      }
-      if (!newData[mk]) newData[mk] = { doing: [], planned: [], blocked: [], done: [], cancelled: [] };
+      // Normalise key to YYYY-MM-01: accept YYYY-MM-DD, YYYY-MM, or YYYY-MM-01
+      const keyMatch = key.match(/^(\d{4})-(\d{2})(?:-\d{2})?$/);
+      if (!keyMatch) throw new Error(`Invalid month key "${key}" in import data. Expected YYYY-MM or YYYY-MM-DD format.`);
+      const month = parseInt(keyMatch[2], 10);
+      if (month < 1 || month > 12) throw new Error(`Invalid month "${keyMatch[2]}" in key "${key}". Month must be 01–12.`);
+      const normKey = `${keyMatch[1]}-${keyMatch[2]}-01`;
 
       const src = data[key];
-      const dest = newData[mk];
-
+      if (!src || typeof src !== 'object' || Array.isArray(src)) {
+        throw new Error(`Invalid data for month "${key}" — expected an object.`);
+      }
+      if (!newData[normKey]) newData[normKey] = { doing: [], planned: [], blocked: [], done: [], cancelled: [] };
+      const dest = newData[normKey];
       COLS.forEach(col => { if (Array.isArray(src[col])) dest[col].push(...src[col].map(item => structuredClone(item))); });
       if (Array.isArray(src.done)) dest.done.push(...src.done.map(item => structuredClone(item)));
       if (Array.isArray(src.cancelled)) dest.cancelled.push(...src.cancelled.map(item => structuredClone(item)));
@@ -62,7 +66,7 @@ function doImport() {
     save();
     closeModal('import-modal');
     document.getElementById('import-ta').value = '';
-    refresh();
+    init(); // defined in init.js -- re-initialises month state and re-renders
     showToast('Data imported successfully.', 'success');
   } catch (e) {
     showToast('Import failed: ' + e.message, 'error');
@@ -76,7 +80,7 @@ function doImport() {
 }
 
 
-// â”€â”€ PDF Export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- PDF Export --
 function openPdfExport() {
   document.querySelector('input[name="pdf-range"][value="current"]').checked = true;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -126,10 +130,10 @@ function generatePdf() {
   win.focus();
   setTimeout(() => { win.print(); }, TIMING.PDF_PRINT_DIALOG_DELAY);
 }
-// buildPdfHtml â€” generates a self-contained HTML document for printing/saving as PDF.
+// buildPdfHtml -- generates a self-contained HTML document for printing/saving as PDF.
 // Opens in a new tab; the browser's native print dialog handles PDF conversion.
-// Keys is an array of ISO week-start dates (YYYY-MM-DD) to include.
-// Theme is 'light' or 'dark' â€” colours are defined in PDF_THEMES and applied inline
+// Keys is an array of month keys (YYYY-MM-01 format) to include.
+// Theme is 'light' or 'dark' -- colours are defined in PDF_THEMES and applied inline
 // since external stylesheets are unreliable in print contexts.
 // The @media print block sets -webkit-print-color-adjust:exact so browsers don't
 // strip background colours when saving to PDF (user still needs "Background graphics"
@@ -171,15 +175,23 @@ function buildPdfHtml(keys,theme){
     const total=w.doing.length+w.planned.length+w.blocked.length+w.done.length+w.cancelled.length;
     if(total===0)return'';
 
-    // Build summary text lines â€” same logic as the manager update preview
+    // Build summary text lines — same logic as the manager update preview
     const L=[];
     function sec(lbl,items){
       if(!items.length)return;
       L.push({type:'heading',text:lbl});
       items.forEach(it=>{
-        const flags=(it.priority==='high'?' [High Priority]':it.priority==='low'?' [Low Priority]':'')+(it.ongoing?' [ongoing]':'')+(it.carried?' [carried]':'');
-        const note=(lbl!=='COMPLETED')?it.note||'':'';
-        L.push({type:'item',text:it.text+flags,note:note,col:lbl,progress:it.progress??null,completedDate:it.completedDate??null});
+        const isResolved = lbl === 'COMPLETED' || lbl === 'CANCELLED';
+        // Active items get priority/flag annotations; resolved items show task name only
+        const flags = isResolved ? '' :
+          (it.priority==='high'?' [High Priority]':it.priority==='low'?' [Low Priority]':'')
+          +(it.ongoing?' [ongoing]':'')+(it.carried?' [carried]':'');
+        // For resolved items: pass only the resolution note (high-level view for manager)
+        // For active items: pass the full note
+        const rawNote = isResolved ? extractResolutionNote(it.note) : (it.note || '');
+        const noteLabel = isResolved && rawNote ? (lbl === 'COMPLETED' ? 'Completion Note' : 'Cancellation Note') : '';
+        const note = noteLabel ? `${noteLabel}: ${rawNote}` : rawNote;
+        L.push({type:'item',text:it.text+flags,note:note,col:lbl,progress:it.progress??null,completedDate:it.completedDate??null,cancelledDate:it.cancelledDate??null});
       });
     }
     sec('IN PROGRESS',w.doing);
@@ -205,8 +217,13 @@ function buildPdfHtml(keys,theme){
       }
       const noteLines=line.note?noteHtml(line.note):'';
       const completedDate=line.completedDate??null;
-      const dateDisplay=completedDate?`<div style="margin-top:4px;font-size:11px;color:${TEXT2}">Completed: ${completedDate}</div>`:'';
-      const pct=!completedDate&&line.progress!==null&&line.progress!==undefined?line.progress:null;
+      const cancelledDate=line.cancelledDate??null;
+      const dateDisplay=completedDate
+        ?`<div style="margin-top:4px;font-size:11px;color:${TEXT2}">Completed: ${completedDate}</div>`
+        :cancelledDate
+        ?`<div style="margin-top:4px;font-size:11px;color:${TEXT2}">Cancelled: ${cancelledDate}</div>`
+        :'';
+      const pct=!completedDate&&!cancelledDate&&line.progress!==null&&line.progress!==undefined?line.progress:null;
       const pBar=pct!==null?`<div style="margin-top:4px;display:flex;align-items:center;gap:8px">
         <div style="flex:1;height:4px;background:${ITEM_BORDER};border-radius:2px;overflow:hidden">
           <div style="width:${pct}%;height:100%;background:${colColor[currentCol]};border-radius:2px"></div>
