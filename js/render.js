@@ -115,11 +115,12 @@ function renderResolved(sec, it, i) {
   const tc = isCan ? 'can-txt' : 'struck';
   const ct = isCan ? `<span class="tag t-can">cancelled</span>` : '';
   const completedDateHtml = !isCan && it.completedDate ? `<span class="tag t-date" title="Completed on ${it.completedDate}">${it.completedDate}</span>` : '';
+  const cancelledDateHtml = isCan && it.cancelledDate ? `<span class="tag t-date" title="Cancelled on ${it.cancelledDate}">${it.cancelledDate}</span>` : '';
   const priorityDot = `<div class="priority-dot ${it.priority === 'high' ? 'p-high' : it.priority === 'med' ? 'p-med' : 'p-low'}"></div>`;
   return `<div class="item ${isCan?'i-ca':'i-dn'}">
     <div class="item-top">
       ${priorityDot}
-      <span class="item-txt ${tc}">${esc(it.text)}${tags}${completedDateHtml}${ct}</span>
+      <span class="item-txt ${tc}">${esc(it.text)}${tags}${completedDateHtml}${cancelledDateHtml}${ct}</span>
       <div class="ibtns">
         <button class="ibt" title="Restore to active" onclick="restoreItem('${sec}',${i})" style="font-size:14px">&#8617;</button>
         <button class="ibt del" title="Remove permanently" onclick="removeResolved('${sec}',${i})">&#x2715;</button>
@@ -176,27 +177,37 @@ function updateSummary(w) {
   function addSection(title, items) {
     if (items.length === 0) return;
     L.push(title);
+    const isResolved = title === 'COMPLETED' || title === 'CANCELLED';
     items.forEach(it => {
-      // Main task title
       let line = ` \u2022 ${it.text}`;
-      if (it.priority === 'high') line += ' [High Priority]';
-      else if (it.priority === 'low') line += ' [Low Priority]';
 
-      if (it.ongoing) line += ' [ongoing]';
-      if (it.carried) line += ' [carried]';
-      if (it.completedDate) line += ` \u2014 Completed: ${it.completedDate}`;
-      else if (it.progress != null) line += ` \u2014 ${it.progress}% complete`;
+      if (!isResolved) {
+        // Active tasks: show priority, flags and progress
+        if (it.priority === 'high') line += ' [High Priority]';
+        else if (it.priority === 'low') line += ' [Low Priority]';
+        if (it.ongoing) line += ' [ongoing]';
+        if (it.carried) line += ' [carried]';
+        if (it.progress != null) line += ` \u2014 ${it.progress}% complete`;
+      } else {
+        // Resolved tasks: date only on the title line
+        if (it.completedDate) line += ` \u2014 Completed: ${it.completedDate}`;
+        else if (it.cancelledDate) line += ` \u2014 Cancelled: ${it.cancelledDate}`;
+      }
       L.push(line);
 
-      // Notes indented under the task (only for active items and cancelled, not completed)
-      if (it.note && title !== 'COMPLETED') {
-        const noteLines = noteToUpdateLines(it.note);
-        noteLines.forEach(noteLine => {
-          L.push(`     ${noteLine}`);   // 5 spaces indentation
-        });
+      if (!isResolved) {
+        // Active tasks: include full note content
+        if (it.note) {
+          noteToUpdateLines(it.note).forEach(noteLine => L.push(`     ${noteLine}`));
+        }
+      } else {
+        // Resolved tasks: only the resolution note from the toast, if one was saved
+        const resNote = extractResolutionNote(it.note);
+        const resLabel = title === 'COMPLETED' ? 'Completion Note' : 'Cancellation Note';
+        if (resNote) L.push(`     ${resLabel}: ${resNote}`);
       }
     });
-    L.push('');   // blank line between sections
+    L.push('');
   }
 
   addSection('IN PROGRESS', w.doing);
@@ -218,23 +229,6 @@ function copyUpdate() {
   }).catch(() => showToast('Copy failed \u2014 please copy the text manually.', 'error', null, null, 4000));
 }
 
-function init() {
-  refresh();
-}
 
-function refresh() {
-  currentKey = monthKey(monthOffset);
-  const w = getOrCreate(currentKey);
-  normalizeOrders(w);
-  document.getElementById('wk-lbl').textContent = getMonthLabel(monthOffset);
-  _syncTodayBtn();
-  ['done', 'cancelled'].forEach(sec => {
-    const body = document.getElementById('body-' + sec);
-    const tog = document.getElementById('tog-' + sec);
-    if (body) body.style.display = secOpen[sec] ? 'block' : 'none';
-    if (tog) tog.innerHTML = secOpen[sec] ? '&#9660;' : '&#9654;';
-  });
-  checkCarry();
-  render();
-}
+
 

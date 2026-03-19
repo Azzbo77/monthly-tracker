@@ -45,7 +45,7 @@
   </div>
 
   <div class="hint-row">
-    <span class="hint">&#10003; complete &nbsp;&#10007; cancel &nbsp;&#9671; ongoing (label only) &nbsp;&#9998; note &nbsp;● priority &nbsp;drag to reorder</span>
+    <span class="hint">&#10003; complete &nbsp;&#10007; cancel &nbsp;&#8594; move &nbsp;&#9671; ongoing &nbsp;&#9998; note &nbsp;● priority &nbsp;drag to reorder &nbsp;&#8617; restore</span>
   </div>
 
   <div class="cols">
@@ -139,92 +139,71 @@
     <div class="modal-sub">A quick guide to getting the most out of your tracker.</div>
 
     <div class="h-sec">
-      <div class="h-hd">Getting Started</div>
+      <div class="h-hd">Getting started</div>
       <div class="h-grid">
-        <div class="h-ic">+ </div>
-        <div class="h-ds">Type a task in any column and press Enter or click the + button to add it.</div>
+        <div class="h-ic">+</div>
+        <div class="h-ds">Type a task in any column and press Enter or click + to add it. Double-click an existing task name to rename it in place.</div>
         <div class="h-ic">Drag</div>
-        <div class="h-ds">Click and drag any task to reorder within a column or move between columns.</div>
+        <div class="h-ds">Drag any task to reorder within a column or move it to another column. The move arrow (→) also lets you switch columns without dragging.</div>
       </div>
     </div>
 
     <div class="h-sec">
-      <div class="h-hd">Task Actions</div>
+      <div class="h-hd">Task buttons</div>
       <div class="h-grid">
-        <div class="h-ic">✓</div><div class="h-ds">Mark as complete.</div>
-        <div class="h-ic">✕</div><div class="h-ds">Mark as cancelled.</div>
-        <div class="h-ic">◉ / ◯</div><div class="h-ds">Mark as ongoing (labels long-term work that may span multiple months).</div>
-        <div class="h-ic">✎</div><div class="h-ds">Add or edit notes, bullets, dates or progress.</div>
-        <div class="h-ic">●</div><div class="h-ds">Click the coloured dot to set priority (High / Medium / Low).</div>
-        <div class="h-ic">↕ Priority</div><div class="h-ds">Click the sort button in any column header to sort that column by High → Medium → Low. Your manual drag order is preserved and can be changed again afterwards.</div>
+        <div class="h-ic">✓</div>
+        <div class="h-ds">Mark as completed. A note toast appears so you can optionally record what was delivered — type and press Save, or press Skip or Escape to dismiss it. A completion date is stored and shown on the task.</div>
+        <div class="h-ic">✕</div>
+        <div class="h-ds">Mark as cancelled. A note toast appears so you can optionally record the reason — type and press Save, or press Skip or Escape to dismiss it. A cancellation date is stored and shown on the task.</div>
+        <div class="h-ic">→</div>
+        <div class="h-ds">Move the task to a different column without dragging.</div>
+        <div class="h-ic">◇ / ◆</div>
+        <div class="h-ds">Toggle the ongoing label. Ongoing is a visual marker for long-running work — it does not auto-carry tasks. Use the carry banner each month to decide what moves forward.</div>
+        <div class="h-ic">✎</div>
+        <div class="h-ds">Open the note editor to add detail, bullets, dates, or a progress percentage.</div>
+        <div class="h-ic">✕ (delete)</div>
+        <div class="h-ds">Delete a task permanently. An Undo option appears for 10 seconds.</div>
+        <div class="h-ic">↩</div>
+        <div class="h-ds">Restore a completed or cancelled task back to its original column.</div>
+        <div class="h-ic">●</div>
+        <div class="h-ds">Click the coloured dot to cycle priority: Low → Medium → High → Low. Red = High, Amber = Medium, Grey = Low.</div>
+        <div class="h-ic">↕ Priority</div>
+        <div class="h-ds">Sort the column by priority (High → Medium → Low). Your drag order is preserved and you can reorder again afterwards.</div>
       </div>
     </div>
 
     <div class="h-sec">
-      <div class="h-hd">Notes & Progress</div>
-      <div class="h-p">
-        In the note editor you can:
-      </div>
-      <ul style="margin-left:20px;font-size:13px;color:var(--text-2);line-height:1.6">
-        <li>Type <strong>• </strong> at the start of a line for bullet points (Enter creates a new one).</li>
-        <li>Use <strong>~~text~~</strong> for strikethrough.</li>
-        <li>Click the 📅 icon to insert today's date (or pick any date).</li>
-        <li>Type a number in the Progress box (e.g. 75) and it will show as a bar.</li>
+      <div class="h-hd">Notes and progress</div>
+      <p class="h-p">Click ✎ on any task to open the note editor. Inside you can:</p>
+      <ul style="margin-left:20px;font-size:13px;color:var(--text-2);line-height:1.8">
+        <li>Start a line with <strong>•</strong> for a bullet point — press Enter to continue the list, or Enter on an empty bullet to end it.</li>
+        <li>Use <strong>~~text~~</strong> to mark something as struck through. The eye icon (👁) lets you hide struck-through lines in the note view without deleting them.</li>
+        <li>Click <strong>📅</strong> to insert a date from a calendar picker. Use arrow keys to navigate it.</li>
+        <li>Type a number in the <strong>Progress</strong> field (0–100) to set a percentage. A colour-coded bar appears on the task card. Setting 100% automatically moves the task to Completed.</li>
       </ul>
+      <p class="h-p" style="margin-top:8px">Press <strong>Cmd+Enter</strong> (Mac) or <strong>Ctrl+Enter</strong> (Windows) to save a note without clicking the Save button.</p>
+      <p class="h-p" style="margin-top:4px">Notes on completed and cancelled tasks are kept for reference but are not included in the manager update.</p>
     </div>
 
     <div class="h-sec">
-      <div class="h-hd">Drag & Drop</div>
-      <div class="h-p">
-        Drag any task (the whole item will respond to drag):
-      </div>
-      <div class="h-p">• Reorder tasks within the same column</div>
-      <div class="h-p">• Move tasks between In progress, Planned and Blocked</div>
-      <div class="h-p">• Your exact order is saved automatically for each month.</div>
+      <div class="h-hd">Month-to-month carry-over</div>
+      <p class="h-p">When you move to a new month, a banner appears if there are incomplete tasks from previous months. It shows the total count and a breakdown by column (e.g. 3 in progress, 2 planned). Click <strong>Carry incomplete tasks to this month</strong> to bring them all forward, or <strong>Dismiss</strong> to hide the banner without carrying anything.</p>
+      <p class="h-p">Completed and cancelled tasks always stay in the month they were resolved and are never carried forward.</p>
     </div>
 
     <div class="h-sec">
-      <div class="h-hd">Manager Update</div>
-      <div class="h-p">
-        The box at the bottom generates a clean summary you can copy and paste into emails or documents. 
-        Task titles appear as main bullets, with any notes nicely indented underneath for easy reading.
-      </div>
+      <div class="h-hd">Manager update</div>
+      <p class="h-p">The summary at the bottom of the page builds automatically from your tasks. Click <strong>Copy update</strong> to copy it to the clipboard, ready to paste into an email or message. In-progress, planned, and blocked tasks include their notes in the update; completed and cancelled tasks show their date only.</p>
     </div>
 
     <div class="h-sec">
-      <div class="h-hd">Month-to-Month Carry-over</div>
-      <div class="h-p">
-        When you move to a new month, a banner appears showing incomplete tasks from previous months. Click 'Carry incomplete tasks to this month' to bring them forward. All incomplete tasks (ongoing or not) can be carried.
-      </div>
-      <div class="h-p">
-        The 'ongoing' tag is purely a label to mark long-term work. It doesn't auto-repeat — you decide each month which tasks to carry through the banner.
-      </div>
-      <div class="h-p">
-        Completed and cancelled tasks stay in their original month and do not carry forward.
-      </div>
+      <div class="h-hd">Search</div>
+      <p class="h-p">Use the search box in the top right to find tasks and notes across all months. Results show the month and column each task belongs to. Closing the search clears the input ready for the next search.</p>
     </div>
 
     <div class="h-sec">
-      <div class="h-hd">Other Features</div>
-      <div class="h-grid">
-        <div class="h-ic">↔︎</div>
-        <div class="h-ds">Use the arrow buttons to move between months.</div>
-        <div class="h-ic">Export PDF / JSON</div>
-        <div class="h-ds">Export the current month as a nicely formatted PDF or all your data as JSON.</div>
-        <div class="h-ic">Import JSON</div>
-        <div class="h-ds">Restore data from a previously exported monthly tracker JSON file.</div>
-        <div class="h-ic">☀︎ / ☾</div>
-        <div class="h-ds">Toggle between light and dark mode.</div>
-      </div>
-    </div>
-
-    <div class="h-sec">
-      <div class="h-hd">Tips</div>
-      <div class="h-p">• Double-click a task name to rename it quickly.</div>
-      <div class="h-p">• Completed tasks at 100% progress move automatically to Completed.</div>
-      <div class="h-p">• Use ↕ Priority in any column header to sort that column. Manual order is preserved and drag reordering still works after sorting.</div>
-      <div class="h-p">• Mark tasks as 'ongoing' to label them as long-term work. Use the carry banner to decide what moves to the next month.</div>
-      <div class="h-p">• Use the search box (top right) to find tasks across all months.</div>
+      <div class="h-hd">Saving, export and import</div>
+      <p class="h-p">Data saves automatically to your browser's local storage on every change. Use <strong>Export JSON</strong> to download a full backup and <strong>Import JSON</strong> (paste or upload) to restore it on another device. Use <strong>Export PDF</strong> to generate a printable report — choose the current month, all months, or specific ones, in light or dark theme.</p>
     </div>
 
     <div class="modal-acts">
@@ -271,6 +250,7 @@
 <script src="js/tasks.js"></script>
 <script src="js/notes.js"></script>
 <script src="js/render.js"></script>
+<script src="js/init.js"></script>
 <script src="js/export.js"></script>
 <script src="js/drag.js"></script>
 <script src="js/search.js"></script>

@@ -224,15 +224,16 @@ function noteToUpdateLines(raw) {
     .map(line => line.trim())
     .filter(line => line.length > 0)
     .map(line => {
+      // Replace strikethrough on all lines first
+      const stripped = line.replace(/~~(.*?)~~/g, '$1 [Done]');
       // Remove leading bullet if present and replace with dash for notes
-      if (line.startsWith('\u2022 ')) {
-        return `- ${line.slice(2)}`;
+      if (stripped.startsWith('\u2022 ')) {
+        return `- ${stripped.slice(2)}`;
       }
-      if (line.startsWith('\u2022')) {
-        return `- ${line.slice(1).trim()}`;
+      if (stripped.startsWith('\u2022')) {
+        return `- ${stripped.slice(1).trim()}`;
       }
-      // Remove strikethrough for clean output
-      return line.replace(/~~(.*?)~~/g, '$1 [Done]');
+      return stripped;
     });
 }
 
@@ -244,3 +245,17 @@ function noteToUpdateLines(raw) {
  * @param {number} i - Zero-based index of the task within its column
  * @returns {string} HTML string ready to insert into the DOM
  */
+
+/**
+ * Extracts only the resolution note added by the completion/cancellation toast.
+ * Returns the text after [Completed] or [Cancelled] if present, otherwise empty string.
+ * Used by the manager update and PDF to show a high-level resolution reason
+ * without exposing the full working notes.
+ * @param {string} note - Raw note content
+ * @returns {string} The resolution note text, or '' if none was saved
+ */
+function extractResolutionNote(note) {
+  if (!note) return '';
+  const match = note.match(/\[Completed\] (.+)$/) || note.match(/\[Cancelled\] (.+)$/);
+  return match ? match[1].trim() : '';
+}

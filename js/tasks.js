@@ -20,6 +20,7 @@ function sortColumnByPriority(col) {
   normalizeOrders(w);
   save();
   render();
+  showToast(`${COL_LABELS[col]} sorted by priority.`, 'info', null, null, 2500);
 }
 
 // Assign consistent order values (0, 1, 2...) to all tasks in a month
@@ -132,6 +133,14 @@ function markDone(col, i) {
   save();
   render();
   launchConfetti();
+  // Offer an optional completion note — delayed so confetti renders first
+  setTimeout(() => {
+    showNoteToast('Add a completion note… (optional)', 'var(--green)', val => {
+      it.note = it.note ? it.note + '\n\n[Completed] ' + val : '[Completed] ' + val;
+      save();
+      render();
+    });
+  }, 400);
 }
 
 function markCancelled(col, i) {
@@ -139,9 +148,18 @@ function markCancelled(col, i) {
   const it = w[col].splice(i, 1)[0];
   shiftEditingKeys(col, i);
   it.cancelledFrom = col;
+  it.cancelledDate = new Date().toISOString().slice(0, DATE.ISO_DATE_SLICE);
   w.cancelled.push(it);
   save();
   render();
+  // Offer an optional cancellation reason note
+  setTimeout(() => {
+    showNoteToast('Add a reason for cancelling… (optional)', 'var(--amber)', val => {
+      it.note = it.note ? it.note + '\n\n[Cancelled] ' + val : '[Cancelled] ' + val;
+      save();
+      render();
+    });
+  }, 100);
 }
 
 function restoreItem(sec, i) {
@@ -149,6 +167,22 @@ function restoreItem(sec, i) {
   const it = w[sec].splice(i, 1)[0];
   const col = COLS.includes(it.completedFrom) ? it.completedFrom :
               COLS.includes(it.cancelledFrom) ? it.cancelledFrom : 'doing';
+  // Clear resolution metadata so the task is clean when reactivated
+  delete it.completedFrom;
+  delete it.completedDate;
+  delete it.cancelledFrom;
+  delete it.cancelledDate;
+  // Strip any completion/cancellation note appended by the note toast.
+  // Two cases: note was the entire content (starts with tag),
+  // or it was appended after existing content (preceded by \n\n).
+  if (it.note) {
+    it.note = it.note
+      .replace(/\n\n\[Completed\][^]*$/, '')
+      .replace(/\n\n\[Cancelled\][^]*$/, '')
+      .replace(/^\[Completed\][^]*$/, '')
+      .replace(/^\[Cancelled\][^]*$/, '')
+      .trimEnd();
+  }
   w[col].push(it);
   save();
   render();

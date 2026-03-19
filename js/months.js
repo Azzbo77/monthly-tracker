@@ -31,18 +31,32 @@ function checkCarry() {
   const prev = Object.keys(weeks).filter(k => k < currentKey).sort();
   let n = 0;
   const monthCounts = {};
+  let totalDoing = 0, totalPlanned = 0, totalBlocked = 0;
   prev.forEach(k => {
     const w = weeks[k];
     const cnt = w.doing.length + w.planned.length + w.blocked.length;
-    if (cnt > 0) { n += cnt; monthCounts[k] = cnt; }
+    if (cnt > 0) {
+      n += cnt;
+      monthCounts[k] = cnt;
+      totalDoing += w.doing.length;
+      totalPlanned += w.planned.length;
+      totalBlocked += w.blocked.length;
+    }
   });
   if (n > 0) {
     bar.style.display = 'flex';
     const prevMonths = Object.keys(monthCounts).length;
-    const sourceMsg = prevMonths === 1 
+    const sourceMsg = prevMonths === 1
       ? 'from ' + getMonthLabelFromKey(Object.keys(monthCounts)[0])
       : 'from ' + prevMonths + ' previous month' + (prevMonths > 1 ? 's' : '');
-    document.getElementById('carry-msg').textContent = `${n} incomplete task${n > 1 ? 's' : ''} ${sourceMsg}.`;
+    // Build a column breakdown string, only showing non-zero columns
+    const breakdown = [
+      totalDoing > 0 ? `${totalDoing} in progress` : '',
+      totalPlanned > 0 ? `${totalPlanned} planned` : '',
+      totalBlocked > 0 ? `${totalBlocked} blocked` : '',
+    ].filter(Boolean).join(', ');
+    document.getElementById('carry-msg').textContent =
+      `${n} incomplete task${n > 1 ? 's' : ''} ${sourceMsg} (${breakdown}).`;
   } else bar.style.display = 'none';
 }
 

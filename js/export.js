@@ -56,7 +56,7 @@ function doImport() {
     save();
     closeModal('import-modal');
     document.getElementById('import-ta').value = '';
-    init(); // defined in render.js — re-initialises month state and re-renders
+    init(); // defined in init.js — re-initialises month state and re-renders
     showToast('Data imported successfully.', 'success');
   } catch (e) {
     showToast('Import failed: ' + e.message, 'error');
@@ -171,9 +171,17 @@ function buildPdfHtml(keys,theme){
       if(!items.length)return;
       L.push({type:'heading',text:lbl});
       items.forEach(it=>{
-        const flags=(it.priority==='high'?' [High Priority]':it.priority==='low'?' [Low Priority]':'')+(it.ongoing?' [ongoing]':'')+(it.carried?' [carried]':'');
-        const note=(lbl!=='COMPLETED')?it.note||'':'';
-        L.push({type:'item',text:it.text+flags,note:note,col:lbl,progress:it.progress??null,completedDate:it.completedDate??null});
+        const isResolved = lbl === 'COMPLETED' || lbl === 'CANCELLED';
+        // Active items get priority/flag annotations; resolved items show task name only
+        const flags = isResolved ? '' :
+          (it.priority==='high'?' [High Priority]':it.priority==='low'?' [Low Priority]':'')
+          +(it.ongoing?' [ongoing]':'')+(it.carried?' [carried]':'');
+        // For resolved items: pass only the resolution note (high-level view for manager)
+        // For active items: pass the full note
+        const rawNote = isResolved ? extractResolutionNote(it.note) : (it.note || '');
+        const noteLabel = isResolved && rawNote ? (lbl === 'COMPLETED' ? 'Completion Note' : 'Cancellation Note') : '';
+        const note = noteLabel ? `${noteLabel}: ${rawNote}` : rawNote;
+        L.push({type:'item',text:it.text+flags,note:note,col:lbl,progress:it.progress??null,completedDate:it.completedDate??null,cancelledDate:it.cancelledDate??null});
       });
     }
     sec('IN PROGRESS',w.doing);
@@ -199,8 +207,13 @@ function buildPdfHtml(keys,theme){
       }
       const noteLines=line.note?noteHtml(line.note):'';
       const completedDate=line.completedDate??null;
-      const dateDisplay=completedDate?`<div style="margin-top:4px;font-size:11px;color:${TEXT2}">Completed: ${completedDate}</div>`:'';
-      const pct=!completedDate&&line.progress!==null&&line.progress!==undefined?line.progress:null;
+      const cancelledDate=line.cancelledDate??null;
+      const dateDisplay=completedDate
+        ?`<div style="margin-top:4px;font-size:11px;color:${TEXT2}">Completed: ${completedDate}</div>`
+        :cancelledDate
+        ?`<div style="margin-top:4px;font-size:11px;color:${TEXT2}">Cancelled: ${cancelledDate}</div>`
+        :'';
+      const pct=!completedDate&&!cancelledDate&&line.progress!==null&&line.progress!==undefined?line.progress:null;
       const pBar=pct!==null?`<div style="margin-top:4px;display:flex;align-items:center;gap:8px">
         <div style="flex:1;height:4px;background:${ITEM_BORDER};border-radius:2px;overflow:hidden">
           <div style="width:${pct}%;height:100%;background:${colColor[currentCol]};border-radius:2px"></div>

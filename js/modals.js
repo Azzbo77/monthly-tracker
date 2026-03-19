@@ -22,13 +22,21 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', e => {
     if (!e.target.closest('.mv-menu') && !e.target.closest('.dp-btn') && !e.target.closest('button.ntb-btn')) {
       closeAllOpenElements();
-      document.querySelectorAll('.mv-menu.open').forEach(m => m.classList.remove('open'));
     }
   });
 });
 
 function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  // Clear search state when the search modal is dismissed
+  if (id === 'search-modal') {
+    const inp = document.getElementById('global-search');
+    if (inp) inp.value = '';
+    const results = document.getElementById('search-results');
+    if (results) results.innerHTML = '';
+  }
+}
 function openHelp() { openModal('help-modal'); }
 function openImport() { openModal('import-modal'); }
 

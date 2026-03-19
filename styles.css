@@ -75,8 +75,8 @@
   .i-dn{border-color:var(--grey);opacity:.6}.i-ca{border-color:var(--amber);opacity:.65}
   .item-top{display:flex;align-items:flex-start;gap:6px}
   .item-txt{font-size:13px;font-weight:500;color:var(--text);flex:1;line-height:1.45;word-break:break-word}
-  .item-txt:hover{cursor:pointer;text-decoration:underline;opacity:.8}
   .item-txt.editable{cursor:text}
+  .item-txt.editable:hover{opacity:.8}
   .item-name-input{flex:1;font-size:13px;font-weight:500;color:var(--text);font-family:'DM Sans',sans-serif;border:.5px solid var(--blue);border-radius:var(--rs);padding:3px 6px;background:var(--surface);outline:none;line-height:1.45}
   .item-name-input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(26,95,168,.1)}
   .struck{text-decoration:line-through;color:var(--text-3);font-weight:400}
@@ -289,3 +289,43 @@
   /* Date picker wrapper */
   .date-picker-wrapper { position: relative; display: inline-block; }
   .ntb-strike { text-decoration: line-through; }
+
+  /* Note-capture toast — extends base toast with an inline text input */
+  .toast-note {
+    background: var(--surface);
+    color: var(--text);
+    border: .5px solid var(--border-mid);
+    max-width: 480px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .toast-note-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-2);
+  }
+  .toast-note .toast-input {
+    width: 100%;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    padding: 6px 10px;
+    border: .5px solid var(--border-mid);
+    border-radius: var(--rs);
+    background: var(--surface2);
+    color: var(--text);
+    outline: none;
+  }
+  .toast-note .toast-input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 2px rgba(26,95,168,.1);
+  }
+  .toast-note .toast-input::placeholder { color: var(--text-3); }
+  .toast-note-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .toast-action-btn--accent {
+    color: #fff;
+  }
