@@ -18,6 +18,7 @@ function sortColumnByPriority(col) {
   const w = getOrCreate(currentKey);
   sortByPriority(w[col]);
   normalizeOrders(w);
+  colSorted[col] = true;
   save();
   render();
   showToast(`${COL_LABELS[col]} sorted by priority.`, 'info', null, null, 2500);
@@ -59,9 +60,11 @@ function addItem(col) {
     ongoing: false,
     progress: null,
     order: 0,
-    priority: 'med'
+    priority: 'med',
+    createdDate: todayDisplayDate()
   });
 
+  colSorted[col] = false;
   inp.value = '';
   save();
   render();
@@ -89,8 +92,11 @@ function setProgress(col, i, val, commit = false) {
     if (fill) { fill.style.width = pct + '%'; fill.style.background = color; }
     if (label) { label.textContent = pct + '%'; label.style.color = color; }
     if (commit && pct === 100) {
-      markDone(col, i);
-      return;
+      // Don't auto-complete if the note editor is open on this task — it's jarring
+      if (!editing[k]) {
+        markDone(col, i);
+        return;
+      }
     }
   }
   updateSummary(getOrCreate(currentKey));
@@ -129,7 +135,7 @@ function markDone(col, i) {
   shiftEditingKeys(col, i);
   if (it.progress !== null && it.progress !== undefined) it.progress = 100;
   it.completedFrom = col;
-  it.completedDate = new Date().toISOString().slice(0, DATE.ISO_DATE_SLICE);
+  it.completedDate = todayDisplayDate();
   w.done.push(it);
   save();
   render();
@@ -148,7 +154,7 @@ function markCancelled(col, i) {
   const it = w[col].splice(i, 1)[0];
   shiftEditingKeys(col, i);
   it.cancelledFrom = col;
-  it.cancelledDate = new Date().toISOString().slice(0, DATE.ISO_DATE_SLICE);
+  it.cancelledDate = todayDisplayDate();
   w.cancelled.push(it);
   save();
   render();
@@ -183,7 +189,7 @@ function restoreItem(sec, i) {
       .replace(/^\[Cancelled\][^]*$/, '')
       .trimEnd();
   }
-  w[col].push(it);
+  w[col].unshift(it);
   save();
   render();
 }
@@ -219,10 +225,10 @@ function clearSec(sec) {
 function moveItem(fc, i, tc) {
   if (fc === tc) return;
   const w = getOrCreate(currentKey);
-  // Clear editor state for the moved task and shift indices for tasks below it
-  // in the source column, so no editor ends up applied to the wrong task.
   shiftEditingKeys(fc, i);
-  w[tc].push(w[fc].splice(i, 1)[0]);
+  colSorted[fc] = false;
+  colSorted[tc] = false;
+  w[tc].unshift(w[fc].splice(i, 1)[0]);
   normalizeOrders(w);
   save();
   render();

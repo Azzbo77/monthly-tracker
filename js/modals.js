@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupModal('pdf-modal','pdf-cancel-btn', generatePdf);
   setupModal('help-modal','help-close-btn');
   setupModal('import-modal','import-cancel-btn');
+  setupModal('json-modal','json-cancel-btn', exportData);
   document.getElementById('import-confirm-btn').addEventListener('click', doImport);
   document.getElementById('import-upload-btn').addEventListener('click', () => {
     const fileInput = document.getElementById('import-file');
@@ -18,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('import-file').addEventListener('change', handleImportFileSelect);
   document.querySelectorAll('input[name="pdf-range"]').forEach(r => r.addEventListener('change', onPdfRangeChange));
+  document.querySelectorAll('input[name="json-range"]').forEach(r => r.addEventListener('change', onJsonRangeChange));
 
   document.addEventListener('click', e => {
     if (!e.target.closest('.mv-menu') && !e.target.closest('.dp-btn') && !e.target.closest('button.ntb-btn')) {

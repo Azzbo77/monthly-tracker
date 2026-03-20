@@ -6,6 +6,28 @@ function debouncedSearch(val) {
 }
 
 /**
+ * Navigates to the month containing a search result and closes the search modal.
+ * Calculates the offset from the current real month to the target month key.
+ * @param {string} targetKey - Month key in YYYY-MM-01 format
+ * @returns {void}
+ */
+function goToMonthFromSearch(targetKey) {
+  const now = new Date();
+  const target = new Date(targetKey + 'T00:00:00');
+  // Calculate offset in whole months between now and target
+  const newOffset = (target.getFullYear() - now.getFullYear()) * 12
+                  + (target.getMonth() - now.getMonth());
+  monthOffset = newOffset;
+  currentKey = targetKey;
+  getOrCreate(currentKey);
+  document.getElementById('wk-lbl').textContent = getMonthLabel(monthOffset);
+  _syncTodayBtn();
+  checkCarry();
+  render();
+  closeModal('search-modal');
+}
+
+/**
  * Searches all months and tasks for a matching query string.
  * Searches both task titles and note content (case-insensitive).
  * Displays results in a modal sorted by month (most recent first).
@@ -56,15 +78,25 @@ function performGlobalSearch(query) {
           : '';
         return `
           <div style="padding:10px;border-bottom:.5px solid var(--border);">
-            <div style="font-size:12px;color:var(--text-3);margin-bottom:4px">${r.monthLabel} &middot; ${STATUS_LABELS[r.col] || r.col}</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:12px;color:var(--text-3)">${r.monthLabel} &middot; ${STATUS_LABELS[r.col] || r.col}</span>
+              <button onclick="goToMonthFromSearch('${r.month}')"
+                style="font-size:11px;padding:2px 8px;border-radius:4px;border:.5px solid var(--border-mid);background:var(--surface2);color:var(--text-2);cursor:pointer;white-space:nowrap;font-family:inherit">
+                Go to month
+              </button>
+            </div>
             <div style="font-weight:500">${esc(r.item.text)}</div>
             ${notePreview}
           </div>`;
       }).join('');
 
   document.getElementById('search-results').innerHTML = html;
+  // Update the modal title to show result count
+  const titleEl = document.querySelector('#search-modal .modal-title');
+  if (titleEl) {
+    titleEl.textContent = results.length === 0
+      ? 'Search Results'
+      : `${results.length} result${results.length === 1 ? '' : 's'} for \u201c${query.trim()}\u201d`;
+  }
   openModal('search-modal');
 }
-
-
-

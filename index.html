@@ -16,7 +16,7 @@
     <div class="hd-acts">
       <button class="btn btn-sm" onclick="openHelp()" aria-label="Open help and usage guide">How to use</button>
       <button class="btn btn-sm" onclick="openPdfExport()" aria-label="Export current month as PDF">Export PDF</button>
-      <button class="btn btn-sm" onclick="exportData()" aria-label="Export all data as JSON file">Export JSON</button>
+      <button class="btn btn-sm" onclick="openJsonExport()" aria-label="Export data as JSON file">Export JSON</button>
       <button class="btn btn-sm" onclick="openImport()" aria-label="Import previously exported JSON">Import JSON</button>
       <button class="btn btn-ic" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle light/dark theme">&#9788;</button>
       <input type="search" id="global-search" placeholder="Search all tasks…" class="search-input" oninput="debouncedSearch(this.value)">
@@ -50,17 +50,17 @@
 
   <div class="cols">
     <div class="col">
-      <div class="col-hd"><div class="col-dot c-do"></div><div><div class="col-title">In progress</div><div class="col-sub">What I'm working on this month</div></div><button class="btn btn-sm" style="margin-left:auto" onclick="sortColumnByPriority('doing')" title="Sort by priority (High → Med → Low)">↕ Priority</button></div>
+      <div class="col-hd"><div class="col-dot c-do"></div><div><div class="col-title">In progress</div><div class="col-sub">What I'm working on this month</div></div><button class="btn btn-sm" id="sort-btn-doing" style="margin-left:auto" onclick="sortColumnByPriority('doing')" title="Sort by priority (High → Med → Low)">↕ Priority</button></div>
       <div class="add-row"><input class="add-in" id="in-doing" placeholder="Add task…" onkeydown="if(event.key==='Enter')addItem('doing')"><button class="add-btn" onclick="addItem('doing')">+</button></div>
       <div class="items" id="list-doing"></div>
     </div>
     <div class="col">
-      <div class="col-hd"><div class="col-dot c-pl"></div><div><div class="col-title">Planned</div><div class="col-sub">Coming up this month</div></div><button class="btn btn-sm" style="margin-left:auto" onclick="sortColumnByPriority('planned')" title="Sort by priority (High → Med → Low)">↕ Priority</button></div>
+      <div class="col-hd"><div class="col-dot c-pl"></div><div><div class="col-title">Planned</div><div class="col-sub">Coming up this month</div></div><button class="btn btn-sm" id="sort-btn-planned" style="margin-left:auto" onclick="sortColumnByPriority('planned')" title="Sort by priority (High → Med → Low)">↕ Priority</button></div>
       <div class="add-row"><input class="add-in" id="in-planned" placeholder="Add task…" onkeydown="if(event.key==='Enter')addItem('planned')"><button class="add-btn" onclick="addItem('planned')">+</button></div>
       <div class="items" id="list-planned"></div>
     </div>
     <div class="col">
-      <div class="col-hd"><div class="col-dot c-bl"></div><div><div class="col-title">Blocked</div><div class="col-sub">Use notes to explain the blocker</div></div><button class="btn btn-sm" style="margin-left:auto" onclick="sortColumnByPriority('blocked')" title="Sort by priority (High → Med → Low)">↕ Priority</button></div>
+      <div class="col-hd"><div class="col-dot c-bl"></div><div><div class="col-title">Blocked</div><div class="col-sub">Use notes to explain the blocker</div></div><button class="btn btn-sm" id="sort-btn-blocked" style="margin-left:auto" onclick="sortColumnByPriority('blocked')" title="Sort by priority (High → Med → Low)">↕ Priority</button></div>
       <div class="add-row"><input class="add-in" id="in-blocked" placeholder="Add blocker…" onkeydown="if(event.key==='Enter')addItem('blocked')"><button class="add-btn" onclick="addItem('blocked')">+</button></div>
       <div class="items" id="list-blocked"></div>
     </div>
@@ -95,6 +95,31 @@
       </div>
     </div>
     <div class="sum-txt" id="summary"></div>
+  </div>
+</div>
+
+<!-- JSON Export -->
+<div class="modal-bg" id="json-modal" role="dialog" aria-modal="true" aria-labelledby="json-modal-title">
+  <div class="modal" style="width:420px" onclick="event.stopPropagation()">
+    <div class="modal-title" id="json-modal-title">Export as JSON</div>
+    <div class="modal-sub">Choose which months to include in your backup file.</div>
+    <div class="form-section-title">Months</div>
+    <div class="form-label-section">
+      <label class="form-label">
+        <input type="radio" name="json-range" value="all" checked class="form-input-radio"> All months with data
+      </label>
+      <label class="form-label">
+        <input type="radio" name="json-range" value="current" class="form-input-radio"> Current month only
+      </label>
+      <label class="form-label">
+        <input type="radio" name="json-range" value="pick" class="form-input-radio"> Choose specific months
+      </label>
+    </div>
+    <div id="json-month-picker" class="modal-picker"></div>
+    <div class="modal-acts">
+      <button class="btn" id="json-cancel-btn">Cancel</button>
+      <button class="btn btn-p" id="json-confirm-btn">Download JSON</button>
+    </div>
   </div>
 </div>
 
@@ -142,7 +167,9 @@
       <div class="h-hd">Getting started</div>
       <div class="h-grid">
         <div class="h-ic">+</div>
-        <div class="h-ds">Type a task in any column and press Enter or click + to add it. Double-click an existing task name to rename it in place.</div>
+        <div class="h-ds">Type a task in any column and press Enter or click + to add it. New tasks appear at the top of the column. Double-click an existing task name to rename it in place.</div>
+        <div class="h-ic">/</div>
+        <div class="h-ds">Press <strong>/</strong> anywhere on the page (when not already typing) to instantly focus the In progress add input — no mouse needed.</div>
         <div class="h-ic">Drag</div>
         <div class="h-ds">Drag any task to reorder within a column or move it to another column. The move arrow (→) also lets you switch columns without dragging.</div>
       </div>
@@ -168,7 +195,7 @@
         <div class="h-ic">●</div>
         <div class="h-ds">Click the coloured dot to cycle priority: Low → Medium → High → Low. Red = High, Amber = Medium, Grey = Low.</div>
         <div class="h-ic">↕ Priority</div>
-        <div class="h-ds">Sort the column by priority (High → Medium → Low). Your drag order is preserved and you can reorder again afterwards.</div>
+        <div class="h-ds">Sort the column by priority (High → Medium → Low). The button changes to <strong>✓ Sorted</strong> while the sort is active. It resets automatically when you drag, add, or move a task — sorting is advisory, not locked.</div>
       </div>
     </div>
 
@@ -187,23 +214,23 @@
 
     <div class="h-sec">
       <div class="h-hd">Month-to-month carry-over</div>
-      <p class="h-p">When you move to a new month, a banner appears if there are incomplete tasks from previous months. It shows the total count and a breakdown by column (e.g. 3 in progress, 2 planned). Click <strong>Carry incomplete tasks to this month</strong> to bring them all forward, or <strong>Dismiss</strong> to hide the banner without carrying anything.</p>
+      <p class="h-p">When you move to a new month, a banner appears if there are incomplete tasks from previous months. It shows the total count and a breakdown by column (e.g. 3 in progress, 2 planned). Click <strong>Carry incomplete tasks to this month</strong> to bring them all forward — an Undo option appears for 10 seconds if you change your mind. Clicking <strong>Dismiss</strong> also shows an Undo in case you dismissed by accident.</p>
       <p class="h-p">Completed and cancelled tasks always stay in the month they were resolved and are never carried forward.</p>
     </div>
 
     <div class="h-sec">
       <div class="h-hd">Manager update</div>
-      <p class="h-p">The summary at the bottom of the page builds automatically from your tasks. Click <strong>Copy update</strong> to copy it to the clipboard, ready to paste into an email or message. In-progress, planned, and blocked tasks include their notes in the update; completed and cancelled tasks show their date only.</p>
+      <p class="h-p">The summary at the bottom of the page builds automatically from your tasks. Click <strong>Copy update</strong> to copy it to the clipboard with a generated-on timestamp, ready to paste into an email or message. In-progress, planned, and blocked tasks include their notes; completed and cancelled tasks show their dates only.</p>
     </div>
 
     <div class="h-sec">
       <div class="h-hd">Search</div>
-      <p class="h-p">Use the search box in the top right to find tasks and notes across all months. Results show the month and column each task belongs to. Closing the search clears the input ready for the next search.</p>
+      <p class="h-p">Use the search box in the top right to find tasks and notes across all months. The result count and query are shown in the modal title. Each result has a <strong>Go to month</strong> button to navigate directly to that month. Closing the search clears the input ready for the next search.</p>
     </div>
 
     <div class="h-sec">
       <div class="h-hd">Saving, export and import</div>
-      <p class="h-p">Data saves automatically to your browser's local storage on every change. Use <strong>Export JSON</strong> to download a full backup and <strong>Import JSON</strong> (paste or upload) to restore it on another device. Use <strong>Export PDF</strong> to generate a printable report — choose the current month, all months, or specific ones, in light or dark theme.</p>
+      <p class="h-p">Data saves automatically to your browser's local storage on every change. Use <strong>Export JSON</strong> to download a backup — you can choose all months, the current month, or specific months. Use <strong>Import JSON</strong> (paste or upload) to restore data on another device. Use <strong>Export PDF</strong> to generate a printable report in light or dark theme.</p>
     </div>
 
     <div class="modal-acts">

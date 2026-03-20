@@ -21,6 +21,7 @@ function getMonthLabelFromKey(k) {
 
 function getOrCreate(k) {
   if (!weeks[k]) weeks[k] = { doing: [], planned: [], blocked: [], done: [], cancelled: [] };
+  if (!weeks[k].done) weeks[k].done = [];
   if (!weeks[k].cancelled) weeks[k].cancelled = [];
   return weeks[k];
 }
@@ -71,6 +72,19 @@ function carryOver() {
   const cur = getOrCreate(currentKey);
   let carriedCount = 0;
 
+  Object.keys(editing).forEach(k => delete editing[k]);
+  Object.keys(editingName).forEach(k => delete editingName[k]);
+
+  // Snapshot for undo
+  const snapshot = {
+    cur: { doing: structuredClone(cur.doing), planned: structuredClone(cur.planned), blocked: structuredClone(cur.blocked) },
+    sources: Object.fromEntries(prev.map(k => [k, {
+      doing: structuredClone(weeks[k].doing),
+      planned: structuredClone(weeks[k].planned),
+      blocked: structuredClone(weeks[k].blocked)
+    }]))
+  };
+
   prev.forEach(k => {
     const w = weeks[k];
     COLS.forEach(col => {
@@ -86,11 +100,38 @@ function carryOver() {
     });
   });
 
-  normalizeOrders(cur);  // Set proper order values for all tasks
+  normalizeOrders(cur);
   save();
   document.getElementById('carry-bar').style.display = 'none';
   render();
-  if (carriedCount > 0) showToast(`Carried ${carriedCount} task${carriedCount > 1 ? 's' : ''} to this month.`, 'success');
+
+  if (carriedCount > 0) {
+    showToast(`Carried ${carriedCount} task${carriedCount > 1 ? 's' : ''} to this month.`, 'success', 'Undo', () => {
+      COLS.forEach(col => { cur[col] = snapshot.cur[col]; });
+      Object.entries(snapshot.sources).forEach(([k, src]) => {
+        COLS.forEach(col => { weeks[k][col] = src[col]; });
+      });
+      normalizeOrders(cur);
+      save();
+      checkCarry();
+      render();
+      showToast('Carry undone — tasks restored to previous months.', 'success', null, null, 3000);
+    }, TIMING.TOAST_DEFAULT_DURATION);
+  }
+}
+
+function dismissCarry() {
+  const bar = document.getElementById('carry-bar');
+  if (bar.style.display === 'none') return;
+  bar.style.display = 'none';
+  showToast('Carry banner dismissed.', 'info', 'Undo', () => {
+    checkCarry();
+  }, TIMING.TOAST_DEFAULT_DURATION);
+}
+
+function _syncTodayBtn() {
+  const btn = document.getElementById('btn-today');
+  if (btn) btn.style.display = monthOffset === 0 ? 'none' : '';
 }
 
 function changeMonth(dir) {
@@ -115,13 +156,3 @@ function goToCurrentMonth() {
   checkCarry();
   render();
 }
-
-function dismissCarry() {
-  document.getElementById('carry-bar').style.display = 'none';
-}
-
-function _syncTodayBtn() {
-  const btn = document.getElementById('btn-today');
-  if (btn) btn.style.display = monthOffset === 0 ? 'none' : '';
-}
-

@@ -80,7 +80,8 @@ function esc(s) {
  * @param {function} onSave    - Called with the note string if the user saves
  */
 function showNoteToast(label, accentColor, onSave) {
-  clearAllToasts();
+  // Only clear other note toasts — do not kill action toasts like delete Undo
+  document.querySelectorAll('.toast-note').forEach(el => el.remove());
 
   const t = document.createElement('div');
   t.setAttribute('role', 'dialog');
@@ -133,4 +134,16 @@ function showNoteToast(label, accentColor, onSave) {
     if (e.key === 'Enter')  { e.preventDefault(); confirm(); }
     if (e.key === 'Escape') { e.preventDefault(); dismiss(); }
   });
+}
+
+/**
+ * Returns today's date as a DD/MM/YYYY string for display on task cards.
+ * Distinct from ISO date slicing which is used only for month keys and internal logic.
+ * @returns {string} e.g. "20/03/2026"
+ */
+function todayDisplayDate() {
+  const d = new Date();
+  return String(d.getDate()).padStart(2, '0') + '/' +
+         String(d.getMonth() + 1).padStart(2, '0') + '/' +
+         d.getFullYear();
 }

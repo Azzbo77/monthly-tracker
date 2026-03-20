@@ -62,6 +62,10 @@ function renderItem(col, it, i) {
       ${esc(it.text)}${tags}
     </span>`;
 
+  const createdLabel = it.createdDate
+    ? `<span class="item-created">Added ${it.createdDate}</span>`
+    : '';
+
   const mid = `mm-${col}-${i}`;
   const mopts = COLS.filter(c => c !== col).map(c =>
     `<button class="mv-opt" onclick="moveItem('${col}',${i},'${c}');event.stopPropagation()">
@@ -104,6 +108,7 @@ function renderItem(col, it, i) {
       </div>
     </div>
     ${progHtml}
+    ${createdLabel}
     ${noteHtml}
   </div>`;
 }
@@ -114,13 +119,14 @@ function renderResolved(sec, it, i) {
   const tags = it.carried ? `<span class="tag t-car">carried</span>` : '';
   const tc = isCan ? 'can-txt' : 'struck';
   const ct = isCan ? `<span class="tag t-can">cancelled</span>` : '';
-  const completedDateHtml = !isCan && it.completedDate ? `<span class="tag t-date" title="Completed on ${it.completedDate}">${it.completedDate}</span>` : '';
-  const cancelledDateHtml = isCan && it.cancelledDate ? `<span class="tag t-date" title="Cancelled on ${it.cancelledDate}">${it.cancelledDate}</span>` : '';
+  const completedDateHtml = !isCan && it.completedDate ? `<span class="tag t-date" title="Completed on ${it.completedDate}">Completed: ${it.completedDate}</span>` : '';
+  const cancelledDateHtml = isCan && it.cancelledDate ? `<span class="tag t-date" title="Cancelled on ${it.cancelledDate}">Cancelled: ${it.cancelledDate}</span>` : '';
+  const createdDateHtml = it.createdDate ? `<span class="tag t-created" title="Created on ${it.createdDate}">Created: ${it.createdDate}</span>` : '';
   const priorityDot = `<div class="priority-dot ${it.priority === 'high' ? 'p-high' : it.priority === 'med' ? 'p-med' : 'p-low'}"></div>`;
   return `<div class="item ${isCan?'i-ca':'i-dn'}">
     <div class="item-top">
       ${priorityDot}
-      <span class="item-txt ${tc}">${esc(it.text)}${tags}${completedDateHtml}${cancelledDateHtml}${ct}</span>
+      <span class="item-txt ${tc}">${esc(it.text)}${tags}${createdDateHtml}${completedDateHtml}${cancelledDateHtml}${ct}</span>
       <div class="ibtns">
         <button class="ibt" title="Restore to active" onclick="restoreItem('${sec}',${i})" style="font-size:14px">&#8617;</button>
         <button class="ibt del" title="Remove permanently" onclick="removeResolved('${sec}',${i})">&#x2715;</button>
@@ -133,7 +139,26 @@ function render() {
   COLS.forEach(col => {
     document.getElementById('cnt-' + col).textContent = w[col].length;
     const el = document.getElementById('list-' + col);
-    el.innerHTML = w[col].length === 0 ? '<div class="empty">Nothing here yet</div>' : w[col].map((it, i) => renderItem(col, it, i)).join('');
+    // Smart empty state: if there are resolved tasks this month, be encouraging
+    if (w[col].length === 0) {
+      const hasResolved = w.done.length > 0 || w.cancelled.length > 0;
+      el.innerHTML = `<div class="empty">${hasResolved ? 'All tasks resolved this month' : 'Nothing here yet'}</div>`;
+    } else {
+      el.innerHTML = w[col].map((it, i) => renderItem(col, it, i)).join('');
+    }
+    // Update sort button label to reflect current sorted state
+    const sortBtn = document.getElementById('sort-btn-' + col);
+    if (sortBtn) {
+      if (colSorted[col]) {
+        sortBtn.textContent = '✓ Sorted';
+        sortBtn.title = 'Currently sorted by priority — drag to reorder, or click to re-sort';
+        sortBtn.style.color = 'var(--green)';
+      } else {
+        sortBtn.textContent = '↕ Priority';
+        sortBtn.title = 'Sort by priority (High → Med → Low)';
+        sortBtn.style.color = '';
+      }
+    }
   });
   ['done','cancelled'].forEach(sec => {
     document.getElementById('cnt-' + sec).textContent = w[sec].length;
@@ -189,7 +214,8 @@ function updateSummary(w) {
         if (it.carried) line += ' [carried]';
         if (it.progress != null) line += ` \u2014 ${it.progress}% complete`;
       } else {
-        // Resolved tasks: date only on the title line
+        // Resolved tasks: created date first, then resolution date
+        if (it.createdDate) line += ` \u2014 Created: ${it.createdDate}`;
         if (it.completedDate) line += ` \u2014 Completed: ${it.completedDate}`;
         else if (it.cancelledDate) line += ` \u2014 Cancelled: ${it.cancelledDate}`;
       }
@@ -222,7 +248,10 @@ function updateSummary(w) {
 function copyUpdate() {
   const txt = document.getElementById('summary').textContent;
   if (!txt || txt === 'Add tasks above to generate your update.') return;
-  navigator.clipboard.writeText(txt).then(() => {
+  // Prepend a generated-on line to the copied text so it's self-contained
+  // when pasted into email or Slack, without cluttering the on-screen preview.
+  const generated = `Generated: ${formatFullDate(new Date())}\n\n`;
+  navigator.clipboard.writeText(generated + txt).then(() => {
     const el = document.getElementById('copy-ok');
     el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), TIMING.COPY_CONFIRMATION_FADE);

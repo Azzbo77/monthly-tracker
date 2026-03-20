@@ -261,6 +261,6 @@ function noteToUpdateLines(raw) {
  */
 function extractResolutionNote(note) {
   if (!note) return '';
-  const match = note.match(/\[Completed\] (.+)$/) || note.match(/\[Cancelled\] (.+)$/);
+  const match = note.match(/\[Completed\] ([^\n]+)/) || note.match(/\[Cancelled\] ([^\n]+)/);
   return match ? match[1].trim() : '';
 }

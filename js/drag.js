@@ -49,9 +49,10 @@ function drop(e) {
   const w = getOrCreate(currentKey);
   if (fromIdx < 0 || fromIdx >= w[fromCol].length) return;
 
-  const [moved] = w[fromCol].splice(fromIdx, 1);
-  // Clear editor state for the moved item so it doesn't persist at the wrong index
   shiftEditingKeys(fromCol, fromIdx);
+  colSorted[fromCol] = false;
+  colSorted[toCol] = false;
+  const [moved] = w[fromCol].splice(fromIdx, 1);
   const insertIdx = (fromCol === toCol && toIdx > fromIdx) ? toIdx - 1 : toIdx;
   w[toCol].splice(insertIdx, 0, moved);
 
@@ -75,17 +76,14 @@ function setupColumnDropZones() {
 
     const handleDragOver = e => {
       e.preventDefault();
-      colEl.classList.add('col-drag-over');
     };
 
     const handleDragLeave = e => {
-      if (!colEl.contains(e.relatedTarget)) colEl.classList.remove('col-drag-over');
     };
 
     const handleDrop = e => {
       // Only handle cross-column drops -- item-level drop stops propagation for reordering
       e.preventDefault();
-      colEl.classList.remove('col-drag-over');
       if (!draggedItem) return;
 
       const fromCol = draggedItem.dataset.col;
@@ -95,10 +93,11 @@ function setupColumnDropZones() {
       const idx = parseInt(draggedItem.dataset.index, 10);
       if (isNaN(idx) || idx < 0 || idx >= w[fromCol].length) return;
 
+      shiftEditingKeys(fromCol, idx);
+      colSorted[fromCol] = false;
+      colSorted[col] = false;
       const [movedTask] = w[fromCol].splice(idx, 1);
       if (!movedTask) return;
-      // Clear editor state for the moved item
-      shiftEditingKeys(fromCol, idx);
 
       w[col].push(movedTask);
       normalizeOrders(w);

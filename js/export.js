@@ -1,11 +1,63 @@
 // -- Export / Import --
+
+function openJsonExport() {
+  // Default to all
+  document.querySelector('input[name="json-range"][value="all"]').checked = true;
+  document.getElementById('json-month-picker').style.display = 'none';
+  openModal('json-modal');
+}
+
+function onJsonRangeChange() {
+  const val = document.querySelector('input[name="json-range"]:checked').value;
+  const picker = document.getElementById('json-month-picker');
+  if (val === 'pick') {
+    picker.style.display = 'flex';
+    const keys = Object.keys(weeks).filter(k => {
+      const w = weeks[k];
+      return w.doing.length + w.planned.length + w.blocked.length + w.done.length + w.cancelled.length > 0;
+    }).sort().reverse();
+    picker.innerHTML = keys.length === 0
+      ? '<span style="font-size:12px;color:var(--text-3);font-style:italic">No months with data found.</span>'
+      : keys.map(k => `
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-2);cursor:pointer">
+          <input type="checkbox" value="${k}" checked style="accent-color:var(--blue)"> ${getMonthLabelFromKey(k)}
+        </label>`).join('');
+  } else {
+    picker.style.display = 'none';
+  }
+}
+
 function exportData() {
+  const range = document.querySelector('input[name="json-range"]:checked').value;
+  let keysToExport;
+
+  if (range === 'current') {
+    keysToExport = [currentKey];
+  } else if (range === 'pick') {
+    keysToExport = Array.from(document.querySelectorAll('#json-month-picker input[type=checkbox]:checked'))
+      .map(c => c.value).sort();
+    if (keysToExport.length === 0) {
+      showToast('No months selected.', 'warning');
+      return;
+    }
+  } else {
+    // all — filter to months that have data
+    keysToExport = null;
+  }
+
   const toExport = {};
   Object.keys(weeks).forEach(k => {
+    if (keysToExport && !keysToExport.includes(k)) return;
     const w = weeks[k];
-    if (w.doing.length + w.planned.length + w.blocked.length + w.done.length + w.cancelled.length > 0) toExport[k] = w;
+    if (w.doing.length + w.planned.length + w.blocked.length + w.done.length + w.cancelled.length > 0) {
+      toExport[k] = w;
+    }
   });
-  const b = new Blob([JSON.stringify({ months: toExport, monthOffset }, null, 2)], { type: 'application/json' });
+
+  // For a single-month export, save the offset for that month rather than the current view
+  const offsetToSave = (range === 'current') ? monthOffset : monthOffset;
+
+  const b = new Blob([JSON.stringify({ months: toExport, monthOffset: offsetToSave }, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(b);
   a.download = 'monthly-tracker-' + new Date().toISOString().slice(0, DATE.ISO_DATE_SLICE) + '.json';
@@ -13,6 +65,7 @@ function exportData() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
+  closeModal('json-modal');
 }
 
 /**
@@ -191,7 +244,7 @@ function buildPdfHtml(keys,theme){
         const rawNote = isResolved ? extractResolutionNote(it.note) : (it.note || '');
         const noteLabel = isResolved && rawNote ? (lbl === 'COMPLETED' ? 'Completion Note' : 'Cancellation Note') : '';
         const note = noteLabel ? `${noteLabel}: ${rawNote}` : rawNote;
-        L.push({type:'item',text:it.text+flags,note:note,col:lbl,progress:it.progress??null,completedDate:it.completedDate??null,cancelledDate:it.cancelledDate??null});
+        L.push({type:'item',text:it.text+flags,note:note,col:lbl,progress:it.progress??null,completedDate:it.completedDate??null,cancelledDate:it.cancelledDate??null,createdDate:it.createdDate??null});
       });
     }
     sec('IN PROGRESS',w.doing);
@@ -218,6 +271,10 @@ function buildPdfHtml(keys,theme){
       const noteLines=line.note?noteHtml(line.note):'';
       const completedDate=line.completedDate??null;
       const cancelledDate=line.cancelledDate??null;
+      const createdDate=line.createdDate??null;
+      const createdDisplay=createdDate
+        ?`<div style="margin-top:4px;font-size:11px;color:${TEXT3}">Created: ${createdDate}</div>`
+        :'';
       const dateDisplay=completedDate
         ?`<div style="margin-top:4px;font-size:11px;color:${TEXT2}">Completed: ${completedDate}</div>`
         :cancelledDate
@@ -232,6 +289,7 @@ function buildPdfHtml(keys,theme){
       </div>`:'';
       return`<div style="margin-bottom:6px;padding:7px 10px;background:${colBg[currentCol]};border-radius:6px;border:.5px solid ${ITEM_BORDER};border-left:3px solid ${colColor[currentCol]}">
         <div style="font-size:12px;font-weight:500;color:${TEXT}">${esc(line.text)}</div>
+        ${createdDisplay}
         ${dateDisplay}
         ${pBar}
         ${noteLines}
