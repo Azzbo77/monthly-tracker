@@ -304,15 +304,40 @@ function buildPdfHtml(keys,theme){
       </div>`;
     }).join('');
 
+    // Completion donut + coloured pill legend
+    const mTotal=w.doing.length+w.planned.length+w.blocked.length+w.done.length+w.cancelled.length;
+    const mDone=w.done.length;
+    const completionPct=mTotal>0?Math.round((mDone/mTotal)*100):0;
+    const r=26,cx=32,cy=32,stroke=7;
+    const arcAngle=(completionPct/100)*2*Math.PI;
+    const x2=cx+r*Math.sin(arcAngle),y2=cy-r*Math.cos(arcAngle);
+    const largeArc=completionPct>50?1:0;
+    const arcPath=completionPct>=100
+      ?`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${GREEN}" stroke-width="${stroke}"/>`
+      :completionPct===0?''
+      :`<path d="M ${cx} ${cy-r} A ${r} ${r} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}" fill="none" stroke="${GREEN}" stroke-width="${stroke}" stroke-linecap="round"/>`;
+    const monthChart=mTotal>0?`
+      <div style="display:flex;align-items:center;gap:24px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid ${DIVIDER}">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;flex:1;align-items:center">
+          ${w.doing.length?`<span style="font-size:13px;font-weight:500;background:${GREEN_BG};color:${GREEN};border-radius:5px;padding:3px 10px">&#9679; ${w.doing.length} in progress</span>`:''}
+          ${w.planned.length?`<span style="font-size:13px;font-weight:500;background:${BLUE_BG};color:${BLUE};border-radius:5px;padding:3px 10px">&#9679; ${w.planned.length} planned</span>`:''}
+          ${w.blocked.length?`<span style="font-size:13px;font-weight:500;background:${RED_BG};color:${RED};border-radius:5px;padding:3px 10px">&#9679; ${w.blocked.length} blocked</span>`:''}
+          ${w.done.length?`<span style="font-size:13px;font-weight:500;background:${GREY_BG};color:${GREY};border-radius:5px;padding:3px 10px">&#9679; ${w.done.length} completed</span>`:''}
+          ${w.cancelled.length?`<span style="font-size:13px;font-weight:500;background:${AMBER_BG};color:${AMBER};border-radius:5px;padding:3px 10px">&#9679; ${w.cancelled.length} cancelled</span>`:''}
+        </div>
+        <div style="text-align:center;flex-shrink:0">
+          <svg width="64" height="64" viewBox="0 0 64 64">
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${ITEM_BORDER}" stroke-width="${stroke}"/>
+            ${arcPath}
+            <text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="12" font-weight="600" fill="${completionPct===0?TEXT3:GREEN}" font-family="DM Sans,sans-serif">${completionPct}%</text>
+          </svg>
+          <div style="font-size:9px;color:${TEXT3};margin-top:1px">complete</div>
+        </div>
+      </div>`:'';
+
     return`<div style="margin-bottom:28px;page-break-inside:avoid">
-      <div style="font-size:22px;font-weight:600;color:${TEXT};margin-bottom:6px;letter-spacing:-.02em">${getMonthLabelFromKey(k)}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid ${DIVIDER}">
-        <span style="font-size:12px;font-weight:500;background:${GREEN_BG};color:${GREEN};border-radius:5px;padding:3px 10px">${w.doing.length} in progress</span>
-        <span style="font-size:12px;font-weight:500;background:${BLUE_BG};color:${BLUE};border-radius:5px;padding:3px 10px">${w.planned.length} planned</span>
-        <span style="font-size:12px;font-weight:500;background:${RED_BG};color:${RED};border-radius:5px;padding:3px 10px">${w.blocked.length} blocked</span>
-        <span style="font-size:12px;font-weight:500;background:${GREY_BG};color:${GREY};border-radius:5px;padding:3px 10px">${w.done.length} completed</span>
-        <span style="font-size:12px;font-weight:500;background:${AMBER_BG};color:${AMBER};border-radius:5px;padding:3px 10px">${w.cancelled.length} cancelled</span>
-      </div>
+      <div style="font-size:22px;font-weight:600;color:${TEXT};margin-bottom:10px;letter-spacing:-.02em">${getMonthLabelFromKey(k)}</div>
+      ${monthChart}
       ${rows}
     </div>`;
   }).join('');
@@ -426,6 +451,34 @@ function buildAccomplishmentsHtml(keys, theme) {
     ? getMonthLabelFromKey(firstKey)
     : `${getMonthLabelFromKey(firstKey)} – ${getMonthLabelFromKey(lastKey)}`;
 
+  // Monthly output bar chart — one bar per selected month
+  const chartKeys = keys.filter(k => getOrCreate(k).done.length > 0 || keys.length <= 1);
+  const barData = keys.map(k => ({ label: getMonthLabelFromKey(k).replace(/\s\(.*\)/, ''), count: getOrCreate(k).done.length }));
+  const maxCount = Math.max(...barData.map(d => d.count), 1);
+  const barW = 28, barGap = 8, chartH = 80, labelH = 28;
+  const chartW = barData.length * (barW + barGap) - barGap;
+  const bars = barData.map((d, i) => {
+    const bh = d.count === 0 ? 2 : Math.max(4, Math.round((d.count / maxCount) * chartH));
+    const x = i * (barW + barGap);
+    const y = chartH - bh;
+    return `<g>
+      <rect x="${x}" y="${y}" width="${barW}" height="${bh}" rx="2" fill="${GREEN}" opacity="${d.count === 0 ? '0.18' : '0.85'}"/>
+      ${d.count > 0 ? `<text x="${x + barW/2}" y="${y - 4}" text-anchor="middle" font-size="9" font-weight="600" fill="${GREEN}" font-family="DM Sans,sans-serif">${d.count}</text>` : ''}
+      <text x="${x + barW/2}" y="${chartH + 12}" text-anchor="middle" font-size="8" fill="${TEXT3}" font-family="DM Sans,sans-serif">${d.label.split(' ')[0].substring(0,3)}</text>
+      <text x="${x + barW/2}" y="${chartH + 22}" text-anchor="middle" font-size="7.5" fill="${TEXT3}" font-family="DM Sans,sans-serif">${d.label.split(' ')[1] || ''}</text>
+    </g>`;
+  }).join('');
+  // Fix width so chart doesn't blow up to full page width in PDF
+  const svgPxW = Math.max(chartW, 120);
+  const monthBarChart = barData.length > 1 ? `
+    <div style="margin:16px 0 20px;padding:14px 16px;background:${GREEN_BG};border-radius:8px;border:.5px solid ${ITEM_BORDER}">
+      <div style="font-size:10px;font-weight:600;color:${GREEN};letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px">Tasks completed by month</div>
+      <svg width="${svgPxW}" height="${chartH + labelH}" viewBox="0 0 ${svgPxW} ${chartH + labelH}" style="display:block;overflow:visible">
+        <line x1="0" y1="${chartH}" x2="${svgPxW}" y2="${chartH}" stroke="${ITEM_BORDER}" stroke-width="1"/>
+        ${bars}
+      </svg>
+    </div>` : '';
+
   return `<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8">
   <title>Accomplishments Report</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -450,6 +503,7 @@ function buildAccomplishmentsHtml(keys, theme) {
     </div>
   </div>
   ${summaryPills ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 20px">${summaryPills}</div>` : ''}
+  ${monthBarChart}
   ${taskRows}
   </body></html>`;
 }
