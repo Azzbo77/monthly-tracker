@@ -127,7 +127,16 @@
 <div class="modal-bg" id="pdf-modal" role="dialog" aria-modal="true" aria-labelledby="pdf-modal-title">
   <div class="modal" style="width:420px" onclick="event.stopPropagation()">
     <div class="modal-title" id="pdf-modal-title">Export as PDF</div>
-    <div class="modal-sub">Choose which months to include and how the report should look.</div>
+    <div class="modal-sub">Choose what to include and how the report should look.</div>
+    <div class="form-section-title">Report type</div>
+    <div class="form-label-section">
+      <label class="form-label">
+        <input type="radio" name="pdf-type" value="full" checked class="form-input-radio"> Full tracker — all tasks by status
+      </label>
+      <label class="form-label">
+        <input type="radio" name="pdf-type" value="accomplishments" class="form-input-radio"> Completed tasks only
+      </label>
+    </div>
     <div class="form-section-title">Months</div>
     <div class="form-label-section">
       <label class="form-label">
@@ -230,7 +239,12 @@
 
     <div class="h-sec">
       <div class="h-hd">Saving, export and import</div>
-      <p class="h-p">Data saves automatically to your browser's local storage on every change. Use <strong>Export JSON</strong> to download a backup — you can choose all months, the current month, or specific months. Use <strong>Import JSON</strong> (paste or upload) to restore data on another device. Use <strong>Export PDF</strong> to generate a printable report in light or dark theme.</p>
+      <p class="h-p">Data saves automatically to your browser's local storage on every change. Use <strong>Export JSON</strong> to download a backup — you can choose all months, the current month, or specific months. Use <strong>Import JSON</strong> (paste or upload) to restore data on another device.</p>
+      <p class="h-p" style="margin-top:6px">Use <strong>Export PDF</strong> to generate a printable report. Choose from two report types:</p>
+      <ul style="margin-left:20px;font-size:13px;color:var(--text-2);line-height:1.8;margin-top:4px">
+        <li><strong>Full tracker</strong> — all tasks grouped by status, with notes and progress. Useful for month-end reviews.</li>
+        <li><strong>Accomplishments</strong> — completed tasks only, numbered, with completion date, time taken, and any completion note. Designed for appraisals and end-of-year reviews.</li>
+      </ul>
     </div>
 
     <div class="modal-acts">

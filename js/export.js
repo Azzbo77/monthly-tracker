@@ -136,10 +136,15 @@ function doImport() {
 // -- PDF Export --
 function openPdfExport() {
   document.querySelector('input[name="pdf-range"][value="current"]').checked = true;
+  document.querySelector('input[name="pdf-type"][value="full"]').checked = true;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   document.querySelector(`input[name="pdf-theme"][value="${isDark ? 'dark' : 'light'}"]`).checked = true;
   document.getElementById('pdf-week-picker').style.display = 'none';
   openModal('pdf-modal');
+}
+
+function onPdfTypeChange() {
+  // No UI changes needed — type is read at generate time
 }
 
 function onPdfRangeChange() {
@@ -162,6 +167,7 @@ function onPdfRangeChange() {
 
 function generatePdf() {
   const range = document.querySelector('input[name="pdf-range"]:checked').value;
+  const reportType = document.querySelector('input[name="pdf-type"]:checked').value;
   let keys = [];
   if (range === 'current') keys = [currentKey];
   else if (range === 'all') {
@@ -175,7 +181,9 @@ function generatePdf() {
   if (keys.length === 0) { showToast('No months selected or no data found.', 'warning'); return; }
   const theme = document.querySelector('input[name="pdf-theme"]:checked').value;
   closeModal('pdf-modal');
-  const html = buildPdfHtml(keys, theme);
+  const html = reportType === 'accomplishments'
+    ? buildAccomplishmentsHtml(keys, theme)
+    : buildPdfHtml(keys, theme);
   const win = window.open('', '_blank');
   if (!win) { showToast('Popup blocked. Please allow popups and try again.', 'warning'); return; }
   win.document.write(html);
@@ -335,3 +343,113 @@ function buildPdfHtml(keys,theme){
   </body></html>`;
 }
 
+
+/**
+ * Builds a self-contained HTML accomplishments report for PDF export.
+ * Shows only completed tasks across the selected months, grouped by month,
+ * with completion date, creation date, time taken, and any completion note.
+ * Designed for end-of-year appraisals or performance reviews.
+ * @param {Array<string>} keys  - Month keys (YYYY-MM-01) to include, sorted ascending
+ * @param {string}        theme - 'light' or 'dark'
+ * @returns {string} Complete HTML document as a string
+ */
+function buildAccomplishmentsHtml(keys, theme) {
+  const colors = theme === 'light' ? PDF_THEMES.light : PDF_THEMES.dark;
+  const {BG,TEXT,TEXT2,TEXT3,DIVIDER,TITLE_LINE,GREEN,GREEN_BG,ITEM_BORDER} = colors;
+
+  // Collect all completed tasks across selected months, keeping month label attached
+  const allDone = [];
+  keys.forEach(k => {
+    const w = getOrCreate(k);
+    w.done.forEach(it => {
+      allDone.push({ it, monthLabel: getMonthLabelFromKey(k) });
+    });
+  });
+
+  // Helper: calculate days between two DD/MM/YYYY display dates
+  function daysBetween(from, to) {
+    if (!from || !to) return null;
+    const parse = s => {
+      const [d, m, y] = s.split('/').map(Number);
+      return new Date(y, m - 1, d);
+    };
+    const diff = parse(to) - parse(from);
+    if (isNaN(diff)) return null;
+    return Math.round(diff / 86400000);
+  }
+
+  const now = new Date();
+  const generated = formatFullDateWithWeekday(now);
+  const totalCount = allDone.length;
+
+  // Group by month for the summary stat
+  const monthCounts = {};
+  allDone.forEach(({ monthLabel }) => {
+    monthCounts[monthLabel] = (monthCounts[monthLabel] || 0) + 1;
+  });
+
+  const taskRows = allDone.length === 0
+    ? `<p style="color:${TEXT3};font-style:italic;margin-top:24px">No completed tasks found in the selected months.</p>`
+    : allDone.map(({ it, monthLabel }, idx) => {
+        const resNote = extractResolutionNote(it.note);
+        const days = daysBetween(it.createdDate, it.completedDate);
+        const daysStr = days !== null ? `${days} day${days === 1 ? '' : 's'}` : null;
+
+        const meta = [
+          it.completedDate ? `<span>Completed: <strong>${it.completedDate}</strong></span>` : '',
+          it.createdDate   ? `<span>Created: <strong>${it.createdDate}</strong></span>` : '',
+          daysStr          ? `<span>Time taken: <strong>${daysStr}</strong></span>` : '',
+          it.priority === 'high' ? `<span style="color:${colors.RED};font-weight:600">High Priority</span>` : '',
+        ].filter(Boolean).join(`<span style="color:${TEXT3};margin:0 6px">&middot;</span>`);
+
+        return `
+          <div style="margin-bottom:10px;padding:10px 14px;background:${GREEN_BG};border-radius:7px;border:.5px solid ${ITEM_BORDER};border-left:3px solid ${GREEN}">
+            <div style="display:flex;align-items:baseline;gap:10px">
+              <span style="font-size:11px;font-weight:600;color:${GREEN};min-width:22px;text-align:right">${idx + 1}.</span>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:600;color:${TEXT};margin-bottom:4px">${esc(it.text)}</div>
+                <div style="font-size:11px;color:${TEXT2};display:flex;flex-wrap:wrap;gap:4px;align-items:center">${meta}</div>
+                ${resNote ? `<div style="margin-top:6px;font-size:12px;color:${TEXT2};font-style:italic;padding-left:2px">&ldquo;${esc(resNote)}&rdquo;</div>` : ''}
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+
+  // Month breakdown summary pills
+  const summaryPills = Object.entries(monthCounts).map(([label, count]) =>
+    `<span style="font-size:12px;font-weight:500;background:${GREEN_BG};color:${GREEN};border-radius:5px;padding:3px 10px;white-space:nowrap">${label}: ${count}</span>`
+  ).join('');
+
+  // Date range label for the report header
+  const firstKey = keys[0], lastKey = keys[keys.length - 1];
+  const rangeLabel = firstKey === lastKey
+    ? getMonthLabelFromKey(firstKey)
+    : `${getMonthLabelFromKey(firstKey)} – ${getMonthLabelFromKey(lastKey)}`;
+
+  return `<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8">
+  <title>Accomplishments Report</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:${BG};color:${TEXT};padding:32px 40px;font-size:13px;line-height:1.6}
+    @media print{
+      body{padding:20px 28px;background:${BG} !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      @page{margin:1.2cm 1.5cm;size:A4}
+    }
+  </style>
+  </head><body>
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;padding-bottom:14px;border-bottom:2px solid ${TITLE_LINE}">
+    <div>
+      <div style="font-size:22px;font-weight:600;letter-spacing:-.02em;color:${TEXT}">Accomplishments Report</div>
+      <div style="font-size:14px;color:${TEXT2};margin-top:3px;font-weight:500">${rangeLabel}</div>
+      <div style="font-size:12px;color:${TEXT3};margin-top:2px">Generated ${generated}</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:28px;font-weight:600;color:${GREEN}">${totalCount}</div>
+      <div style="font-size:11px;color:${TEXT2}">task${totalCount === 1 ? '' : 's'} completed</div>
+    </div>
+  </div>
+  ${summaryPills ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 20px">${summaryPills}</div>` : ''}
+  ${taskRows}
+  </body></html>`;
+}
