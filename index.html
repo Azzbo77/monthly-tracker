@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monthly Work Tracker</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a7a56'/%3E%3Crect x='8' y='9' width='10' height='2' rx='1' fill='white'/%3E%3Crect x='8' y='14' width='16' height='2' rx='1' fill='white'/%3E%3Crect x='8' y='19' width='12' height='2' rx='1' fill='white'/%3E%3Ccircle cx='24' cy='22' r='5' fill='%233ecf8e'/%3E%3Cpath d='M21.5 22l2 2 3.5-3.5' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=12">
+</head>
+<body>
+<div class="app">
+  <div class="hd">
+    <div class="hd-brand">
+      <div class="hd-title">Monthly tracker</div>
+      <a class="hd-repo" href="https://github.com/Azzbo77/monthly-tracker" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </div>
+    <div class="hd-acts">
+      <button class="btn btn-sm" onclick="openHelp()" aria-label="Open help and usage guide">How to use</button>
+      <button class="btn btn-sm" onclick="openPdfExport()" aria-label="Export current month as PDF">Export PDF</button>
+      <button class="btn btn-sm" onclick="openJsonExport()" aria-label="Export data as JSON file">Export JSON</button>
+      <button class="btn btn-sm" onclick="openImport()" aria-label="Import previously exported JSON">Import JSON</button>
+      <button class="btn btn-ic" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle light/dark theme">&#9788;</button>
+      <input type="search" id="global-search" placeholder="Search all tasks…" class="search-input" oninput="debouncedSearch(this.value)">
+    </div>
+  </div>
+
+  <div class="wk-nav">
+    <button class="btn btn-ic" onclick="changeMonth(-1)" aria-label="Go to previous month">&#8592;</button>
+    <span class="wk-lbl" id="wk-lbl"></span>
+    <button class="btn btn-ic" onclick="changeMonth(1)" aria-label="Go to next month">&#8594;</button>
+    <button class="btn btn-sm" id="btn-today" onclick="goToCurrentMonth()" aria-label="Go to current month" style="display:none">Today</button>
+  </div>
+
+  <div id="carry-bar" style="display:none" class="carry">
+    <span id="carry-msg"></span>
+    <button onclick="carryOver()">Carry incomplete tasks to this month</button>
+    <button onclick="dismissCarry()" style="background:none;border:none;color:var(--info-text);opacity:.6;cursor:pointer;font-size:12px;padding:2px 6px;font-family:'DM Sans',sans-serif" aria-label="Dismiss carry banner">Dismiss</button>
+  </div>
+
+  <div id="backup-bar" style="display:none" class="carry">
+    <span>Friday backup — export a JSON copy so this week is not only in the browser.</span>
+    <button onclick="openJsonExport()">Export JSON</button>
+    <button onclick="dismissBackupNudge()" style="background:none;border:none;color:var(--info-text);opacity:.6;cursor:pointer;font-size:12px;padding:2px 6px;font-family:'DM Sans',sans-serif" aria-label="Dismiss backup reminder">Dismiss</button>
+  </div>
+
+  <div class="totals">
+    <div class="tc"><div class="tc-lbl"><div class="dot d-do"></div>In progress</div><div class="tc-num" id="cnt-doing">0</div></div>
+    <div class="tc"><div class="tc-lbl"><div class="dot d-pl"></div>Planned</div><div class="tc-num" id="cnt-planned">0</div></div>
+    <div class="tc"><div class="tc-lbl"><div class="dot d-bl"></div>Blocked</div><div class="tc-num" id="cnt-blocked">0</div></div>
+    <div class="tc"><div class="tc-lbl"><div class="dot d-dn"></div>Completed</div><div class="tc-num" id="cnt-done">0</div></div>
+    <div class="tc"><div class="tc-lbl"><div class="dot d-ca"></div>Cancelled</div><div class="tc-num" id="cnt-cancelled">0</div></div>
+  </div>
+
+  <div class="hint-row">
+    <span class="hint">&#10003; complete &nbsp;&#10007; cancel &nbsp;&#8594; move &nbsp;&#9671; ongoing &nbsp;&#9998; note &nbsp;● priority &nbsp;drag to reorder &nbsp;&#8617; restore</span>
+  </div>
+
+  <div class="cols">
+    <div class="col">
+      <div class="col-hd"><div class="col-dot c-do"></div><div><div class="col-title">In progress</div><div class="col-sub">What I'm working on this month</div></div><button class="btn btn-sm" id="sort-btn-doing" style="margin-left:auto" onclick="sortColumnByPriority('doing')" title="Sort by priority (High → Med → Low)">↕ Priority</button></div>
+      <div class="add-row"><input class="add-in" id="in-doing" placeholder="Add task…" onkeydown="if(event.key==='Enter')addItem('doing')"><button class="add-btn" onclick="addItem('doing')">+</button></div>
+      <div class="items" id="list-doing"></div>
+    </div>
+    <div class="col">
+      <div class="col-hd"><div class="col-dot c-pl"></div><div><div class="col-title">Planned</div><div class="col-sub">Coming up this month</div></div><button class="btn btn-sm" id="sort-btn-planned" style="margin-left:auto" onclick="sortColumnByPriority('planned')" title="Sort by priority (High → Med → Low)">↕ Priority</button></div>
+      <div class="add-row"><input class="add-in" id="in-planned" placeholder="Add task…" onkeydown="if(event.key==='Enter')addItem('planned')"><button class="add-btn" onclick="addItem('planned')">+</button></div>
+      <div class="items" id="list-planned"></div>
+    </div>
+    <div class="col">
+      <div class="col-hd"><div class="col-dot c-bl"></div><div><div class="col-title">Blocked</div><div class="col-sub">Use notes to explain the blocker</div></div><button class="btn btn-sm" id="sort-btn-blocked" style="margin-left:auto" onclick="sortColumnByPriority('blocked')" title="Sort by priority (High → Med → Low)">↕ Priority</button></div>
+      <div class="add-row"><input class="add-in" id="in-blocked" placeholder="Add blocker…" onkeydown="if(event.key==='Enter')addItem('blocked')"><button class="add-btn" onclick="addItem('blocked')">+</button></div>
+      <div class="items" id="list-blocked"></div>
+    </div>
+  </div>
+
+  <div class="ls">
+    <div class="ls-hd" onclick="toggleSec('done')">
+      <div class="col-dot c-dn"></div>
+      <div><div class="col-title">Completed</div><div class="col-sub">Finished this month</div></div>
+      <span class="ls-clr" onclick="event.stopPropagation();clearSec('done')">Clear all</span>
+      <span class="ls-tog" id="tog-done">&#9660;</span>
+    </div>
+    <div class="ls-body" id="body-done"><div class="items" id="list-done"></div></div>
+  </div>
+
+  <div class="ls">
+    <div class="ls-hd" onclick="toggleSec('cancelled')">
+      <div class="col-dot c-ca"></div>
+      <div><div class="col-title">Cancelled</div><div class="col-sub">Tasks dropped or outside your control</div></div>
+      <span class="ls-clr" onclick="event.stopPropagation();clearSec('cancelled')">Clear all</span>
+      <span class="ls-tog" id="tog-cancelled">&#9660;</span>
+    </div>
+    <div class="ls-body" id="body-cancelled"><div class="items" id="list-cancelled"></div></div>
+  </div>
+
+  <div class="sum-box">
+    <div class="sum-hd">
+      <span class="sum-lbl">Manager update</span>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="btn btn-sm" onclick="copyUpdate()">Copy update</button>
+        <span class="copy-ok" id="copy-ok">Copied!</span>
+      </div>
+    </div>
+    <div class="sum-txt" id="summary"></div>
+  </div>
+</div>
+
+<!-- JSON Export -->
+<div class="modal-bg" id="json-modal" role="dialog" aria-modal="true" aria-labelledby="json-modal-title">
+  <div class="modal" style="width:420px" onclick="event.stopPropagation()">
+    <div class="modal-title" id="json-modal-title">Export as JSON</div>
+    <div class="modal-sub">Choose which months to include in your backup file.</div>
+    <div class="form-section-title">Months</div>
+    <div class="form-label-section">
+      <label class="form-label">
+        <input type="radio" name="json-range" value="all" checked class="form-input-radio"> All months with data
+      </label>
+      <label class="form-label">
+        <input type="radio" name="json-range" value="current" class="form-input-radio"> Current month only
+      </label>
+      <label class="form-label">
+        <input type="radio" name="json-range" value="pick" class="form-input-radio"> Choose specific months
+      </label>
+    </div>
+    <div id="json-month-picker" class="modal-picker"></div>
+    <div class="modal-acts">
+      <button class="btn" id="json-cancel-btn">Cancel</button>
+      <button class="btn btn-p" id="json-confirm-btn">Download JSON</button>
+    </div>
+  </div>
+</div>
+
+<!-- PDF Export -->
+<div class="modal-bg" id="pdf-modal" role="dialog" aria-modal="true" aria-labelledby="pdf-modal-title">
+  <div class="modal" style="width:420px" onclick="event.stopPropagation()">
+    <div class="modal-title" id="pdf-modal-title">Export as PDF</div>
+    <div class="modal-sub">Choose what to include and how the report should look.</div>
+    <div class="form-section-title">Report type</div>
+    <div class="form-label-section">
+      <label class="form-label">
+        <input type="radio" name="pdf-type" value="full" checked class="form-input-radio"> Full tracker — all tasks by status
+      </label>
+      <label class="form-label">
+        <input type="radio" name="pdf-type" value="accomplishments" class="form-input-radio"> Achievements
+      </label>
+    </div>
+    <div class="form-section-title">Months</div>
+    <div class="form-label-section">
+      <label class="form-label">
+        <input type="radio" name="pdf-range" value="current" checked class="form-input-radio"> Current month only
+      </label>
+      <label class="form-label">
+        <input type="radio" name="pdf-range" value="all" class="form-input-radio"> All months with data
+      </label>
+      <label class="form-label">
+        <input type="radio" name="pdf-range" value="pick" class="form-input-radio"> Choose specific months
+      </label>
+    </div>
+    <div id="pdf-week-picker" class="modal-picker"></div>
+    <div class="form-section-title">Appearance</div>
+    <div class="modal-appearance">
+      <label class="form-label">
+        <input type="radio" name="pdf-theme" value="light" checked class="form-input-radio"> Light
+      </label>
+      <label class="form-label">
+        <input type="radio" name="pdf-theme" value="dark" class="form-input-radio"> Dark
+      </label>
+    </div>
+    <div class="modal-acts">
+      <button class="btn" id="pdf-cancel-btn">Cancel</button>
+      <button class="btn btn-p" id="pdf-confirm-btn">Generate PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- How to use -->
+<div class="modal-bg" id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+  <div class="modal">
+    <div class="modal-title">How to use the Monthly Tracker</div>
+    <div class="modal-sub">A quick guide to getting the most out of your tracker.</div>
+
+    <div class="h-sec">
+      <div class="h-hd">Getting started</div>
+      <div class="h-grid">
+        <div class="h-ic">+</div>
+        <div class="h-ds">Type a task in any column and press Enter or click + to add it. New tasks appear at the top of the column. Double-click an existing task name to rename it in place.</div>
+        <div class="h-ic">/</div>
+        <div class="h-ds">Press <strong>/</strong> anywhere on the page (when not already typing) to focus the In progress add input. Press again to cycle to Planned, again for Blocked, and back to In progress.</div>
+        <div class="h-ic">Drag</div>
+        <div class="h-ds">Drag any task to reorder within a column or move it to another column. The move arrow (→) also lets you switch columns without dragging.</div>
+      </div>
+    </div>
+
+    <div class="h-sec">
+      <div class="h-hd">Task buttons</div>
+      <div class="h-grid">
+        <div class="h-ic">✓</div>
+        <div class="h-ds">Mark as completed. A toast appears with a <strong>Completed on</strong> date (defaults to today — change it if you finished earlier and are logging later), an optional note, and <strong>Mark as achievement</strong> for significant work. Save or Skip both keep the date you chose. You can also edit the date later on the completed task.</div>
+        <div class="h-ic">✕</div>
+        <div class="h-ds">Mark as cancelled. A toast appears with a <strong>Cancelled on</strong> date (change it if you are logging later) and an optional reason. Save or Skip both keep the date. You can edit the date later on the cancelled task.</div>
+        <div class="h-ic">→</div>
+        <div class="h-ds">Move the task to a different column without dragging.</div>
+        <div class="h-ic">◇ / ◆</div>
+        <div class="h-ds">Toggle the ongoing label. Ongoing is a visual marker for long-running work — it does not auto-carry tasks. Use the carry banner each month to decide what moves forward.</div>
+        <div class="h-ic">✎</div>
+        <div class="h-ds">Open the note editor to add detail, bullets, dates, or a progress percentage.</div>
+        <div class="h-ic">✕ (delete)</div>
+        <div class="h-ds">Delete a task permanently. An Undo option appears for 10 seconds.</div>
+        <div class="h-ic">↩</div>
+        <div class="h-ds">Restore a completed or cancelled task back to its original column.</div>
+        <div class="h-ic">●</div>
+        <div class="h-ds">Click the coloured dot to cycle priority: Low → Medium → High → Low. Red = High, Amber = Medium, Grey = Low.</div>
+        <div class="h-ic">↕ Priority</div>
+        <div class="h-ds">Sort the column by priority (High → Medium → Low). The button changes to <strong>✓ Sorted</strong> while the sort is active. It resets automatically when you drag, add, or move a task — sorting is advisory, not locked.</div>
+      </div>
+    </div>
+
+    <div class="h-sec">
+      <div class="h-hd">Notes and progress</div>
+      <p class="h-p">Click ✎ on any task to open the note editor. Inside you can:</p>
+      <ul style="margin-left:20px;font-size:13px;color:var(--text-2);line-height:1.8">
+        <li>Start a line with <strong>•</strong> for a bullet point — press Enter to continue the list, or Enter on an empty bullet to end it.</li>
+        <li>Use <strong>~~text~~</strong> to mark something as struck through. The eye icon (👁) lets you hide struck-through lines in the note view without deleting them.</li>
+        <li>Click <strong>📅</strong> to insert a date from a calendar picker. Use arrow keys to navigate it.</li>
+        <li>Type a number in the <strong>%</strong> field on the task card (0–100). Setting 100% and leaving the field (or pressing Enter) moves the task to Completed. The same field is also in the note editor.</li>
+      </ul>
+      <p class="h-p" style="margin-top:8px">Press <strong>Cmd+Enter</strong> (Mac) or <strong>Ctrl+Enter</strong> (Windows) to save a note without clicking the Save button.</p>
+      <p class="h-p" style="margin-top:4px">Notes on completed and cancelled tasks are kept for reference but are not included in the manager update.</p>
+    </div>
+
+    <div class="h-sec">
+      <div class="h-hd">Month-to-month carry-over</div>
+      <p class="h-p">When you move to a new month, a banner appears if there are incomplete tasks from previous months. It shows the total count and a breakdown by column (e.g. 3 in progress, 2 planned). Click <strong>Carry incomplete tasks to this month</strong> to bring them all forward — an Undo option appears for 10 seconds if you change your mind. Clicking <strong>Dismiss</strong> also shows an Undo in case you dismissed by accident.</p>
+      <p class="h-p">Completed and cancelled tasks always stay in the month they were resolved and are never carried forward.</p>
+    </div>
+
+    <div class="h-sec">
+      <div class="h-hd">Manager update</div>
+      <p class="h-p">The summary at the bottom of the page builds automatically from your tasks. Click <strong>Copy update</strong> to copy it to the clipboard with a generated-on timestamp, ready to paste into an email or message. In-progress, planned, and blocked tasks include their notes; completed and cancelled tasks show their dates only.</p>
+    </div>
+
+    <div class="h-sec">
+      <div class="h-hd">Search</div>
+      <p class="h-p">Use the search box in the top right to find tasks and notes across all months. Matching text is highlighted in amber in both the task title and note preview. The result count and query are shown in the modal title. Each result has a <strong>Go to task</strong> button that opens that month and scrolls to the matching card. Closing the search clears the input ready for the next search.</p>
+    </div>
+
+    <div class="h-sec">
+      <div class="h-hd">Saving, export and import</div>
+      <p class="h-p">Data saves automatically to your browser's local storage on every change. Use <strong>Export JSON</strong> to download a backup — you can choose all months, the current month, or specific months. Use <strong>Import JSON</strong> (paste or upload) to restore data on another device. Choose <strong>Replace</strong> to overwrite everything, or <strong>Merge</strong> to add the file’s tasks alongside what you already have.</p>
+      <p class="h-p" style="margin-top:6px">Use <strong>Export PDF</strong> to generate a printable report. Choose from two report types:</p>
+      <ul style="margin-left:20px;font-size:13px;color:var(--text-2);line-height:1.8;margin-top:4px">
+        <li><strong>Full tracker</strong> — all tasks grouped by status, with notes and progress. Useful for month-end reviews.</li>
+        <li><strong>Achievements</strong> — only tasks you ticked <strong>Mark as achievement</strong> when completing them. When you mark a task complete, the note toast includes a checkbox to flag it as an achievement — use this for work that goes beyond your day-to-day, such as significant deliveries, new initiatives, or anything worth highlighting in a performance review. Routine tasks you don't tick are excluded automatically.</li>
+      </ul>
+    </div>
+
+    <div class="modal-acts">
+      <button class="btn btn-p" id="help-close-btn">Got it, thanks</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import -->
+<div class="modal-bg" id="import-modal" role="dialog" aria-modal="true" aria-labelledby="import-modal-title">
+  <div class="modal">
+    <div class="modal-title" id="import-modal-title">Import JSON</div>
+    <div class="modal-sub">Upload or paste a previously exported monthly tracker JSON file. Replace wipes current data; merge keeps yours and adds the file’s months and tasks.</div>
+    <div class="form-label-section">
+      <label class="form-label">
+        <input type="radio" name="import-mode" value="replace" checked class="form-input-radio"> Replace current data
+      </label>
+      <label class="form-label">
+        <input type="radio" name="import-mode" value="merge" class="form-input-radio"> Merge with current data
+      </label>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+      <input type="file" id="import-file" accept=".json,application/json" style="display:none" />
+      <button class="btn" id="import-upload-btn" type="button">Upload JSON file</button>
+      <span style="font-size:12px;color:var(--text-3)">or paste below</span>
+    </div>
+    <textarea id="import-ta" placeholder="Paste exported JSON here…"></textarea>
+    <div class="modal-acts">
+      <button class="btn" id="import-cancel-btn">Cancel</button>
+      <button class="btn btn-p" id="import-confirm-btn">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- Search -->
+<div class="modal-bg" id="search-modal" role="dialog" aria-modal="true">
+  <div class="modal" style="width:640px;max-width:95vw">
+    <div class="modal-title">Search Results</div>
+    <div style="margin:16px 0;max-height:60vh;overflow-y:auto" id="search-results"></div>
+    <div class="modal-acts">
+      <button class="btn btn-p" onclick="closeModal('search-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/constants.js?v=12"></script>
+<script src="js/state.js?v=12"></script>
+<script src="js/utils.js?v=12"></script>
+<script src="js/storage.js?v=12"></script>
+<script src="js/modals.js?v=12"></script>
+<script src="js/months.js?v=12"></script>
+<script src="js/tasks.js?v=12"></script>
+<script src="js/notes.js?v=12"></script>
+<script src="js/render.js?v=12"></script>
+<script src="js/init.js?v=12"></script>
+<script src="js/export.js?v=12"></script>
+<script src="js/drag.js?v=12"></script>
+<script src="js/search.js?v=12"></script>
+<script src="js/main.js?v=12"></script>
+</body>
+</html>
