@@ -17,17 +17,20 @@ As you add tasks throughout the month, a **manager update** is automatically for
 - **Five task states** — in progress, planned, blocked, completed, and cancelled
 - **Drag and drop** — reorder tasks within a column or move them between columns
 - **Priority levels** — mark tasks as high, medium, or low priority with colour-coded dots
+- **Priority sorting** — sort active columns from high to low priority while preserving the order within each priority level
 - **Progress tracking** — set a percentage complete on any task; reaching 100 % automatically marks it as done
 - **Notes on tasks** — with bullet point, strikethrough formatting, and an inline date picker
+- **Achievement tracking** — optionally flag completed tasks as achievements for focused accomplishment reports
 - **Ongoing flag** — mark a task as ongoing to make it easy to identify when carrying tasks forward
 - **Carry over** — incomplete tasks from previous months can be carried forward to the current month in one click
 - **Month navigation** — browse forwards and backwards through any month; each month's data is stored separately
 - **Global search** — search across all months and tasks in one place
 - **Manager update** — auto-generated summary at the bottom of the page; copy to clipboard in one click
-- **PDF export** — export one month, all months, or a custom selection to a formatted PDF
-- **JSON export and import** — download a full backup of your data and restore it on any device
+- **PDF export** — export one month, all months, or a custom selection to a formatted PDF, using either a full tracker or achievements-only report in light or dark theme
+- **JSON export and import** — download all, current, or selected months and restore them on any device by replacing or merging data
 - **Dark mode** — toggle between light and dark themes; preference is remembered
 - **Auto-save** — every change is saved instantly to browser local storage
+- **Backup reminder** — receive a Friday reminder to export a JSON backup, with the option to dismiss it
 
 ## How to use
 
@@ -53,7 +56,9 @@ js/
   notes.js        — note editor, date picker, note-to-HTML rendering
   render.js       — DOM rendering and manager update summary
   export.js       — JSON export/import and PDF generation
-  search.js       — global search, confetti, and drag-and-drop
+  search.js       — global search and completion confetti
+  drag.js         — task drag-and-drop and column drop zones
+  init.js         — initialisation and refresh flow
   main.js         — bootstrap
 ```
 
