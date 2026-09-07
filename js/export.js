@@ -245,7 +245,7 @@ function buildPdfHtml(keys,theme){
         const rawNote = isResolved ? extractResolutionNote(it.note) : (it.note || '');
         const noteLabel = isResolved && rawNote ? (lbl === 'COMPLETED' ? 'Completion Note' : 'Cancellation Note') : '';
         const note = noteLabel ? `${noteLabel}: ${rawNote}` : rawNote;
-        L.push({type:'item',text:it.text+flags,note:note,col:lbl,progress:it.progress??null,completedDate:it.completedDate??null,cancelledDate:it.cancelledDate??null,createdDate:it.createdDate??null});
+        L.push({type:'item',text:it.text+flags,note:note,col:lbl,progress:it.progress??null,completedDate:it.completedDate??null,cancelledDate:it.cancelledDate??null,createdDate:it.createdDate??null,startedDate:it.startedDate||null});
       });
     }
     sec('IN PROGRESS',w.doing);
@@ -273,8 +273,12 @@ function buildPdfHtml(keys,theme){
       const completedDate=line.completedDate??null;
       const cancelledDate=line.cancelledDate??null;
       const createdDate=line.createdDate??null;
+      const startedDate=line.startedDate??null;
       const createdDisplay=createdDate
         ?`<div style="margin-top:4px;font-size:11px;color:${TEXT3}">Created: ${createdDate}</div>`
+        :'';
+      const startedDisplay=startedDate
+        ?`<div style="margin-top:4px;font-size:11px;color:${TEXT3}">Started: ${startedDate}</div>`
         :'';
       const dateDisplay=completedDate
         ?`<div style="margin-top:4px;font-size:11px;color:${TEXT2}">Completed: ${completedDate}</div>`
@@ -291,6 +295,7 @@ function buildPdfHtml(keys,theme){
       return`<div class="pdf-card" style="margin-bottom:6px;padding:7px 10px;background:${colBg[currentCol]};border-radius:6px;border:.5px solid ${ITEM_BORDER};border-left:3px solid ${colColor[currentCol]}">
         <div style="font-size:12px;font-weight:500;color:${TEXT}">${esc(line.text)}</div>
         ${createdDisplay}
+        ${startedDisplay}
         ${dateDisplay}
         ${pBar}
         ${noteLines}
